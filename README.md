@@ -6,3 +6,8 @@ Arguments:
 
 `type`: The input `.root` type, e.g. `'s1'` for muon mode data
 
+`noise`: The detector location noise, default 10 micron 
+
+'save': Boolean, save the `.root` features file or not.
+
+`num_test`: For debug. If `num_test=0`, then run through all the events.
