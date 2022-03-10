@@ -1,3 +1,6 @@
-# Lepton Flavor Universality Violation at $Z$-pole
+# Lepton Flavor Universality Violation at $`Z`$-pole
 
-LFUV @ Z-pole
+Main reconstruction code, using CERN ROOT: `allinone.C`
+Arguments: 
+`type`: The input `.root` type, e.g. `'s1'` for 
+
