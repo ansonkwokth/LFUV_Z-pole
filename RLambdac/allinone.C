@@ -1,4 +1,5 @@
 // R(Lambdac)
+
 #include <cmath>
 #include <iostream>
 #include <random>
