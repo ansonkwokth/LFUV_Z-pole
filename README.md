@@ -1,4 +1,4 @@
-# Lepton Flavor Universality Violation at <pre xml:lang="latex">Z</pre>-pole
+# Lepton Flavor Universality Violation at <img src="https://latex.codecogs.com/svg.latex?\Large&space;Z" title="Z" />-pole
 
 Main reconstruction code, using CERN ROOT: `allinone.C`
 Arguments: 
