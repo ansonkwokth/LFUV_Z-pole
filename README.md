@@ -11,3 +11,6 @@ Arguments:
 'save': Boolean, save the `.root` features file or not.
 
 `num_test`: For debug. If `num_test=0`, then run through all the events.
+
+
+Example: `root -b -q 'allinone.C("s1")'`
