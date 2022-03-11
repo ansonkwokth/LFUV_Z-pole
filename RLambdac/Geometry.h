@@ -1,8 +1,7 @@
-
+#pragma once
 #include <cmath>
-//#include <iostream>
 #include <random>
-// using namespace std;
+
 #include "FinalStatesClass.C"
 #include "Rtypes.h"
 #include "TClonesArray.h"
