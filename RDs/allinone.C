@@ -149,7 +149,7 @@ Int_t ClassifySignal(TClonesArray* branchParticle, TLorentzVector* BTrue, TLoren
     }
     // cout <<  foundBTrue <<"; "<< foundCTrue <<"; "<< foundCTrue <<"; "<<
     // foundC2True <<"; "<< foundC3True << "; " << foundMuTrue <<endl;
-    if (foundBTrue == 1 && foundCTrue == 1 && foundCTrue == 1 &&
+    if (foundBTrue == 1 && foundCTrue == 1 && foundC1True == 1 &&
         foundC2True == 1 && foundC3True == 1 && foundMuTrue == 1) {
         iFinalStates iFSTrue_;
         iFSTrue_.iKNeg = iC1True;
@@ -1429,7 +1429,7 @@ calDeltaM(TClonesArray* branchEFlowPhoton, TLorentzVector Ds, TLorentzVector pho
 }
 //}}}
 
-void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = false, Int_t num_test = 100, const Float_t alpha = 1) {
+void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = false, Int_t num_test = 0, const Float_t alpha = 1) {
     cout << "\n\n\n\n\n\n\n\n"
          << endl;
     string typeName;
@@ -1439,106 +1439,104 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     if (type == "s1") {
         typeName = "Bs->Ds tau nu. ";
         cout << "Bs->Ds tau nu. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/Bs0Dstaunu-Dsphipi-phiKK_100k_RandomSeed0.root";
+        inputFile = "./Bs0Dstaunu-Dsphipi-phiKK_100k_RandomSeed0.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsTauNu_10Noise.root";
+            outputFile = "./features/DsTauNu_10Noise.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsTauNu_20Noise.root";
+            outputFile = "./features/DsTauNu_20Noise.root";
         }
 
     } else if (type == "s2") {
         cout << "Bs->Ds mu nu. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/Bs0Dsmunu-Dsphipi-phiKK_100k_RandomSeed0.root";
+        inputFile = "./Bs0Dsmunu-Dsphipi-phiKK_100k_RandomSeed0.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsMuNu_10Noise.root";
+            outputFile = "./features/DsMuNu_10Noise.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsMuNu_20Noise.root";
+            outputFile = "./features/DsMuNu_20Noise.root";
         }
     } else if (type == "s3") {
         cout << "Bs->Ds* mu nu. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/Bs0Dsstartaunu-Dsphipi-phiKK_30k_RandomSeed0_30k_RandomSeed1.root";
+        inputFile = "./Bs0Dsstartaunu-Dsphipi-phiKK_30k_RandomSeed0_30k_RandomSeed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_10Noise.root";
+            outputFile = "./features/DsstarTauNu_10Noise.root";
             if (abs(alpha - 0) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_10Noise_0Alpha.root";
+                outputFile = "./features/DsstarTauNu_10Noise_0Alpha.root";
             } else if (abs(alpha - 0.5) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_10Noise_05Alpha.root";
+                outputFile = "./features/DsstarTauNu_10Noise_05Alpha.root";
             } else if (abs(alpha - 2) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_10Noise_2Alpha.root";
+                outputFile = "./features/DsstarTauNu_10Noise_2Alpha.root";
             } else if (abs(alpha - 0.1) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_10Noise_01Alpha.root";
+                outputFile = "./features/DsstarTauNu_10Noise_01Alpha.root";
             }
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsstarTauNu_20Noise.root";
+            outputFile = "./features/DsstarTauNu_20Noise.root";
         }
     } else if (type == "s4") {
         cout << "Bs->Ds* mu nu. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/Bs0Dsstarmunu-Dsphipi-phiKK_30k_RandomSeed0.root";
+        inputFile = "./Bs0Dsstarmunu-Dsphipi-phiKK_30k_RandomSeed0.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_10Noise.root";
+            outputFile = "./features/DsstarMuNu_10Noise.root";
             if (abs(alpha - 0) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_10Noise_0Alpha.root";
+                outputFile = "./features/DsstarMuNu_10Noise_0Alpha.root";
             } else if (abs(alpha - 0.1) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_10Noise_01Alpha.root";
+                outputFile = "./features/DsstarMuNu_10Noise_01Alpha.root";
             } else if (abs(alpha - 0.5) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_10Noise_05Alpha.root";
+                outputFile = "./features/DsstarMuNu_10Noise_05Alpha.root";
             } else if (abs(alpha - 2) < 1e-6) {
-                outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_10Noise_2Alpha.root";
+                outputFile = "./features/DsstarMuNu_10Noise_2Alpha.root";
             }
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/DsstarMuNu_20Noise.root";
+            outputFile = "./features/DsstarMuNu_20Noise.root";
         }
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/RDs_comb_1mseed1_1mseed2_1mseed3.root";
-        outputFile = "~/Projects/LFUV/RDs/testoutput";
+        inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        outputFile = "./testoutput";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsCombCascade_10Noise.root";
+            outputFile = "./features/RDsCombCascade_10Noise.root";
         }
         if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsCombCascade_20Noise.root";
+            outputFile = "./features/RDsCombCascade_20Noise.root";
         }
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/RDs_comb_1mseed1_1mseed2_1mseed3.root";
-        outputFile = "~/Projects/LFUV/RDs/testoutput";
+        inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        outputFile = "./testoutput";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsComb_10Noise.root";
+            outputFile = "./features/RDsComb_10Noise.root";
         }
         if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsComb_20Noise.root";
+            outputFile = "./features/RDsComb_20Noise.root";
         }
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/RDs_comb_1mseed1_1mseed2_1mseed3.root";
-        outputFile = "~/Projects/LFUV/RDs/testoutput";
+        inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        outputFile = "./testoutput";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsCascade_10Noise.root";
+            outputFile = "./features/RDsCascade_10Noise.root";
         }
         if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsCascade_20Noise.root";
+            outputFile = "./features/RDsCascade_20Noise.root";
         }
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/RDs_comb_1mseed1_1mseed2_1mseed3.root";
-        outputFile = "~/Projects/LFUV/RDs/testoutput.root";
+        inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        outputFile = "./testoutput.root";
         if (noise_ == 10) {
-            outputFile =
-                "~/Projects/LFUV/RDs/features/RDsInclusive_10Noise.root";
+            outputFile = "./features/RDsInclusive_10Noise.root";
         }
         if (noise_ == 20) {
-            outputFile =
-                "~/Projects/LFUV/RDs/features/RDsInclusive_20Noise.root";
+            outputFile = "./features/RDsInclusive_20Noise.root";
         }
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RDs/RDs_comb_1mseed1_1mseed2_1mseed3.root";
-        outputFile = "~/Projects/LFUV/RDs/testoutput";
+        inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        outputFile = "./testoutput";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsMisID_10Noise.root";
+            outputFile = "./features/RDsMisID_10Noise.root";
         }
         if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RDs/features/RDsMisID_20Noise.root";
+            outputFile = "./features/RDsMisID_20Noise.root";
         }
     } else {
         cout << "Not match. ";
@@ -1655,8 +1653,7 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
         // i_en << endl;
         nEvt += 1;
         //==========================================================================
-        //===============   Finding the correspdoning final states
-        //===============
+        //===============   Finding the correspdoning final states   ===============
         //==========================================================================
         iFinalStates iFS = FindFinalStatesIndex(branchTrack);
         if (iFS.foundFromC == 0) {
@@ -1683,8 +1680,7 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
             // iFS.iPi << "; " << iFS.iMu << endl;
 
             //==========================================================================
-            //==================   Defining 4 Momentum & 3 Positions
-            //==================
+            //==================   Defining 4 Momentum & 3 Positions  ==================
             //==========================================================================
 
             Track* KNegTrack = (Track*)branchTrack->At(iFS.iKNeg);
@@ -1739,8 +1735,7 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
             v3C += v3CNoise;
 
             //==========================================================================
-            //========================   Vetoing muon and Hc
-            //=========================
+            //========================   Vetoing muon and Hc   =========================
             //==========================================================================
             // veto muon
             Float_t disMuTr;
@@ -1778,8 +1773,7 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
             nMuPt += 1;
 
             //==========================================================================
-            //=======================   Deduce B decay vertex
-            //========================
+            //=======================   Deduce B decay vertex   ========================
             //==========================================================================
             if (Length(v3C.X(), v3C.Y(), v3C.Z()) < 0.05) {
                 continue;
@@ -1820,8 +1814,7 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
             }
 
             //==========================================================================
-            //==============================   Features
-            //==============================
+            //==============================   Features   ==============================
             //==========================================================================
             // q2
             TLorentzVector q;
