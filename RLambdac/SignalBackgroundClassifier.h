@@ -1,4 +1,3 @@
-
 #include <iostream>
 using namespace std;
 #include "FinalStatesClass.C"
@@ -6,6 +5,7 @@ using namespace std;
 #include "TLorentzVector.h"
 #include "classes/DelphesClasses.h"
 
+// classifying singals, and storing the truth level indices
 Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLorentzVector *HcTrue, TLorentzVector *muTrue, TVector3 *v3HcTrue, TVector3 *v3MuTrue, iFinalStates *iFSTrue, Int_t mode) {
     GenParticle *particle;
     GenParticle *particleB;
@@ -35,9 +35,7 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
             Int_t iMuTrue_i, foundMuTrue_i = 0;
             for (int ip2 = 0; ip2 < nParticles; ip2++) {
                 particle0 = (GenParticle *)branchParticle->At(ip2);
-                if (particle0->M1 == -1) {
-                    continue;
-                }
+                if (particle0->M1 == -1) continue;
                 particle0M = (GenParticle *)branchParticle->At(particle0->M1);
 
                 if (abs(particle0->PID) == 4122 && particle0->M1 == iBTrue) {
@@ -57,9 +55,7 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
                     foundC3True_i = 1;
                 }
 
-                if (particle0M->M1 == -1) {
-                    continue;
-                }
+                if (particle0M->M1 == -1) continue;
                 particle0MM = (GenParticle *)branchParticle->At(particle0M->M1);
                 if (abs(particle0->PID) == 2212 && abs(particle0MM->PID) == 4122 && particle0MM->M1 == iBTrue) {
                     iC1True_i = ip2;
@@ -74,13 +70,6 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
                     foundC3True_i = 1;
                 }
 
-                /*
-                if ((abs(particle0->PID) == 13 && particle0->M1 == iBTrue) ||
-                    (abs(particle0->PID) == 13 && abs(particle0M->PID) == 15 && particle0M->M1 == iBTrue)) {
-                    iMuTrue_i = ip2; foundMuTrue_i = 1;
-                }
-              */
-
                 if (mode == 1 && (abs(particle0->PID) == 13 && abs(particle0M->PID) == 15 && particle0M->M1 == iBTrue)) {
                     iMuTrue_i = ip2;
                     foundMuTrue_i = 1;
@@ -90,7 +79,6 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
                     foundMuTrue_i = 1;
                 }
             }
-            // cout <<  foundCTrue_i <<"; "<< foundC1True_i <<"; "<< foundC2True_i <<"; "<< foundC3True_i<< "; " << foundMuTrue_i<<endl;
             if (foundCTrue_i == 1 && foundC1True_i == 1 && foundC2True_i == 1 && foundC3True_i == 1 && foundMuTrue_i == 1) {
                 iCTrue = iCTrue_i;
                 foundCTrue = 1;
@@ -106,7 +94,6 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
             }
         }
     }
-    // cout <<  foundBTrue <<"; "<< foundCTrue <<"; "<< foundCTrue <<"; "<< foundC2True <<"; "<< foundC3True << "; " << foundMuTrue <<endl;
     if (foundBTrue == 1 && foundCTrue == 1 && foundCTrue == 1 && foundC2True == 1 && foundC3True == 1 && foundMuTrue == 1) {
         iFinalStates iFSTrue_;
         iFSTrue_.iP = iC1True;
@@ -142,9 +129,8 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
         return 0;
     }
 }
-//}}}
 
-//---------- return if the event is the targeted bkg (from inclusive samples) {{{
+// classify if the event is the targeted bkg (from inclusive samples)
 Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
     // Inclusive samepls (for Comb+Cascade, Comb, Casde, Inclusive)
     GenParticle *particle;
@@ -155,33 +141,21 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
     Int_t nNegHc = 0;  // number of negative targeted c-hadron in the truth level (Jpsi, Ds, Lambdac)
     for (int ip = 0; ip < nParticles; ip++) {
         particle = (GenParticle *)branchParticle->At(ip);
-        if (particle->PID == 4122) {
-            nPosHc += 1;
-        }  // check number of pos lambdac
-        if (particle->PID == -4122) {
-            nNegHc += 1;
-        }  // check number of neg lambdac
+        if (particle->PID == 4122) nPosHc += 1;   // check number of pos lambdac
+        if (particle->PID == -4122) nNegHc += 1;  // check number of neg lambdac
     }
-    if (not(nPosHc + nNegHc >= 1)) {
-        return 0;
-    }  // must have at least one lambdac
+    if (not(nPosHc + nNegHc >= 1)) return 0;  // must have at least one lambdac
 
     //=== check muons ===
     Int_t nPosMu = 0;  // number of positive muons
     Int_t nNegMu = 0;  // number of negative muons
     for (int ip = 0; ip < nParticles; ip++) {
         particle = (GenParticle *)branchParticle->At(ip);
-        if (particle->PID == -13) {
-            nPosMu += 1;
-        }
-        if (particle->PID == 13) {
-            nNegMu += 1;
-        }
+        if (particle->PID == -13) nPosMu += 1;
+        if (particle->PID == 13) nNegMu += 1;
     }
     // total must be at least 3, (2 from Jpsi, 1 unapired), and at least 1 pos, 1 neg from Jpsi
-    if (not((nPosHc > 0 && nNegMu > 0) || (nNegHc > 0 && nPosMu > 0))) {
-        return 0;
-    }
+    if (not((nPosHc > 0 && nNegMu > 0) || (nNegHc > 0 && nPosMu > 0))) return 0;
 
     //=== check the decay chain ===
     Int_t isLeptonFromB = 0;      // check if the lepton is from b-hadron
@@ -209,38 +183,28 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
 
             // identify the lepton (mu/tau)
             Int_t iLepton = ip1;
-            if (abs(particle1M->PID) == 15) {
-                iLepton = particle1->M1;
-            }
+            if (abs(particle1M->PID) == 15) iLepton = particle1->M1;
             particleL = (GenParticle *)branchParticle->At(iLepton);
             Int_t iLeptonMother = particleL->M1;
             particle1M = (GenParticle *)branchParticle->At(iLeptonMother);
-            // cout << "Lepton: " << particleL->PID << " (" << iLepton << ") from: ";
 
             // finding the b-hadron that lepton from
             Int_t BHadron_idx = 99999;
             nLeptonStepFromB = 0;
             while (true) {
-                // cout << particle1M->PID << " < ";
-                if (int(abs(particle1M->PID) / 100) == 5 || int(abs(particle1M->PID) / 1000) == 5 || int(abs(particle1M->PID) / 10000) == 5 ||
-                    int((abs(particle1M->PID) % 1000) / 100) == 5) {
+                if (int(abs(particle1M->PID) / 100) == 5 || int(abs(particle1M->PID) / 1000) == 5 ||
+                    int(abs(particle1M->PID) / 10000) == 5 || int((abs(particle1M->PID) % 1000) / 100) == 5) {
                     BHadron_idx = iLeptonMother;
-                    // cout << "\n From b-hadron (IDX): " << particle1M->PID << " (" << BHadron_idx << ")" << endl;
                     break;
                 } else if (int(particle1M->PID / 10) == 0) {
-                    // cout << "\nNo b-hadron, terminated at: " << particle1M->PID << endl;
                     break;
                 }
                 nLeptonStepFromB += 1;
                 iLeptonMother = particle1M->M1;
                 particle1M = (GenParticle *)branchParticle->At(iLeptonMother);
             }
-            if (BHadron_idx != 99999) {
-                isLeptonFromB = 1;
-            }
-            if (BHadron_idx != 99999 && nLeptonStepFromB == 0) {
-                isLeptonSemiFromB = 1;
-            }
+            if (BHadron_idx != 99999) isLeptonFromB = 1;
+            if (BHadron_idx != 99999 && nLeptonStepFromB == 0) isLeptonSemiFromB = 1;
 
             // if lepton is from b-hadron, then find if c-hadron is from the same mother
             if (isLeptonFromB == 1) {
@@ -256,56 +220,36 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
                             isSignal = 1;
                             continue;
                         }
-                        // cout << "c-hadron " << particleC->PID << " (" << iCMother << ") from: ";
 
                         while (true) {
-                            // cout << particle2M->PID << " (" << iCMother << ")" << " < ";
                             if (iCMother == BHadron_idx) {
-                                // cout << "/nc-hadron from the smae b-hadron: " << particle2M->PID << endl;
                                 isCFromB = 1;
                                 break;
                             }
                             if (int(particle2M->PID / 10) == 0) {
-                                // cout << "\nc-hadron not from same b-hadron terminate at: " << particle2M->PID << endl;
                                 break;
                             }
                             iCMother = particle2M->M1;
                             particle2M = (GenParticle *)branchParticle->At(iCMother);
                         }
-                        if (isCFromB == 1 || isSignal == 1) {
-                            break;
-                        }
+                        if (isCFromB == 1 || isSignal == 1) break;
                     }
                 }
-                if (isCFromB == 1 || isSignal == 1) {
-                    break;
-                }
+                if (isCFromB == 1 || isSignal == 1) break;
             }
         }
     }
-    if (isSignal == 1) {
-        return 0;
-    }
+    if (isSignal == 1) return 0;
 
     Int_t isComb = 0;
     Int_t isCascade = 0;
     Int_t isInclusive = 0;
 
-    if (isLeptonSemiFromB == 1 && isCFromB == 1) {
-        isInclusive = 1;
-    }
-    if (isLeptonFromB == 1 && isLeptonSemiFromB == 0 && isCFromB == 1) {
-        isCascade = 1;
-    }
-    if (isCFromB == 0) {
-        isComb = 1;
-    }
+    if (isLeptonSemiFromB == 1 && isCFromB == 1) isInclusive = 1;
+    if (isLeptonFromB == 1 && isLeptonSemiFromB == 0 && isCFromB == 1) isCascade = 1;
+    if (isCFromB == 0) isComb = 1;
+    if (isInclusive + isCascade + isComb != 1) cout << "HAVE BUG IN CLASSIFYING BKG!";
 
-    if (isInclusive + isCascade + isComb != 1) {
-        cout << "HAVE BUG IN CLASSIFYING BKG!";
-    }
-
-    // cout << "Signal: " << isSignal << "; Inclsuive: " << isInclusive << "; Cascade: " << isCascade << "; Comb:" << isComb << endl;
     if (type == "b1") {
         if (isCascade == 0 && isComb == 0) {
             return 0;
@@ -337,9 +281,8 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
         return 0;
     }
 }
-//}}}
 
-//---------- return if the event is misID bkg {{{
+// chck if the event is misID bkg {{{
 Int_t ClassifyMisID(TClonesArray *branchParticle) {
     // skip signal events
     TLorentzVector dummy;
@@ -357,27 +300,18 @@ Int_t ClassifyMisID(TClonesArray *branchParticle) {
         Int_t nHc = 0;  // number of targeted c-hadron in the truth level (Jpsi, Ds, Lambdac)
         for (int ip = 0; ip < nParticles; ip++) {
             particle = (GenParticle *)branchParticle->At(ip);
-            if (abs(particle->PID) == 4122) {
-                nHc += 1;
-            }  // check number of Jpsi
+            if (abs(particle->PID) == 4122) nHc += 1;  // check number of c-hadron
         }
-        if (not(nHc >= 1)) {
-            return 0;
-        }  // must have at least one Jpsi
+        if (not(nHc >= 1)) return 0;  // require having at least one Jpsi
 
         //=== check pions ===
         Int_t nPi = 0;  // number of pions (displaced)
         for (int ip = 0; ip < nParticles; ip++) {
             particle = (GenParticle *)branchParticle->At(ip);
-            if (abs(particle->PID) == 211 && (not(particle->X == 0 && particle->Y == 0 && particle->Z == 0))) {
-                nPi += 1;
-            }
+            if (abs(particle->PID) == 211 && (not(particle->X == 0 && particle->Y == 0 && particle->Z == 0))) nPi += 1;
         }
-        if (not(nPi >= 2)) {
-            return 0;
-        }
+        if (not(nPi >= 2)) return 0;
         return 1;
     }
 }
-//}}}
 

@@ -1,4 +1,3 @@
-
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -10,6 +9,7 @@ using namespace std;
 #include "TLorentzVector.h"
 #include "classes/DelphesClasses.h"
 
+// calculation of p_perp (from 2001.03225v2, 2003.08453v3)
 Float_t cal_pPerp(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
     TLorentzVector HcMu;
     HcMu = Hc + Mu;
@@ -18,6 +18,7 @@ Float_t cal_pPerp(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
     return pPerp;
 }
 
+// calculation of m_corr (from 2001.03225v2, 2003.08453v3)
 Float_t cal_mCorr(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
     Float_t pPerp = cal_pPerp(v3B, Hc, Mu);
     TLorentzVector HcMu;
@@ -26,6 +27,7 @@ Float_t cal_mCorr(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
     return mCorr;
 }
 
+// max and sum of impact parameters
 struct impactParams {
     Float_t D0Max = 0;
     Float_t D0Sum = 0;
@@ -33,33 +35,33 @@ struct impactParams {
     Float_t DzSum = 0;
 };
 
+// loop over the charged particle tracks to calculate the max and sum of impact parameters
 impactParams FindImpactParams(TClonesArray *branchTrack, iFinalStates iFS, TVector3 v3B) {
     impactParams impParams;
-
     Int_t nTracks = branchTrack->GetEntries();
     Track *track;
+
     for (int it = 0; it < nTracks; it++) {
         track = (Track *)branchTrack->At(it);
-        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu) {
-            continue;
-        }
+        // exclude the decay products from tagged b-hadron
+        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu) continue;
+
         TLorentzVector impTr;
         impTr.SetPtEtaPhiE(track->PT, track->Eta, track->Phi, track->P);
+        // required same direction as b-hadron
         if ((impTr.Px() * v3B.X() + impTr.Py() * v3B.Y() + impTr.Pz() * v3B.Z() > 0) &&
             (track->X * v3B.X() + track->Y * v3B.Y() + track->Z * v3B.Z() > 0)) {
             impParams.D0Sum += abs(track->D0);
             impParams.DzSum += abs(track->DZ);
-            if (abs(track->D0) > impParams.D0Max) {
-                impParams.D0Max = abs(track->D0);
-            }
-            if (abs(track->DZ) > impParams.DzMax) {
-                impParams.DzMax = abs(track->DZ);
-            }
+            // find max
+            if (abs(track->D0) > impParams.D0Max) impParams.D0Max = abs(track->D0);
+            if (abs(track->DZ) > impParams.DzMax) impParams.DzMax = abs(track->DZ);
         }
     }
     return impParams;
 }
 
+// ioslation variables: with different sizes, and particle types
 struct isolationVars {
     Float_t ENeutral03 = 0;
     Float_t ENeutral06 = 0;
@@ -67,7 +69,6 @@ struct isolationVars {
     Float_t ENeutral06Hadron = 0;
     Float_t ENeutral03Photon = 0;
     Float_t ENeutral06Photon = 0;
-
     Float_t ECharge03 = 0;
     Float_t ECharge06 = 0;
     Float_t ECharge03PV = 0;
@@ -76,6 +77,7 @@ struct isolationVars {
     Float_t ECharge06DV = 0;
 };
 
+// calculate isolation variables
 isolationVars FindIsolationVars(
     TClonesArray *branchTrack,
     TClonesArray *branchEFlowNeutralHadron,
@@ -96,8 +98,10 @@ isolationVars FindIsolationVars(
     Tower *eflowPho;
     Track *track;
 
+    // loop over neutral hadrons
     for (int in = 0; in < nEFlowNeutralHadrons; in++) {
         eflowNeuHad = (Tower *)branchEFlowNeutralHadron->At(in);
+        // deduce pT
         Float_t pt = eflowNeuHad->ET * pow(eflowNeuHad->E * eflowNeuHad->E - mK0 * mK0, 0.5) / eflowNeuHad->E;
         TLorentzVector NeuHadi;
         NeuHadi.SetPtEtaPhiE(pt, eflowNeuHad->Eta, eflowNeuHad->Phi, eflowNeuHad->E);
@@ -110,7 +114,7 @@ isolationVars FindIsolationVars(
             B06NeuHad += NeuHadi;
         }
     }
-
+    // loop over photons
     for (int iph = 0; iph < nEFlowPhotons; iph++) {
         eflowPho = (Tower *)branchEFlowPhoton->At(iph);
         TLorentzVector Phoi;
@@ -124,10 +128,10 @@ isolationVars FindIsolationVars(
             B06NeuPho += Phoi;
         }
     }
+    // loop over charged tracks
     for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu) {
-            continue;
-        }
+        // exclude tagged final states
+        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu) continue;
         track = (Track *)branchTrack->At(it);
         TLorentzVector Tri;
         Tri.SetPtEtaPhiE(track->PT, track->Eta, track->Phi, track->P);
@@ -155,19 +159,17 @@ isolationVars FindIsolationVars(
     isoVars.ENeutral06Hadron = B06NeuHad.E();
     isoVars.ENeutral03Photon = B03NeuPho.E();
     isoVars.ENeutral06Photon = B06NeuPho.E();
-
     isoVars.ECharge03 = B03Chg.E();
     isoVars.ECharge06 = B06Chg.E();
     isoVars.ECharge03PV = B03ChgPV.E();
     isoVars.ECharge06PV = B06ChgPV.E();
     isoVars.ECharge03DV = B03ChgDV.E();
     isoVars.ECharge06DV = B06ChgDV.E();
-    // cout << isoVars.ECharge06DV<<endl;
     return isoVars;
 }
 
+// reconstruct K0S -> pi pi
 TLorentzVector reconstructK0S(TClonesArray *branchTrack, iFinalStates iFS, double noise) {
-    // reconstruct K0S -> pi pi
     TLorentzVector K0S;
     K0S.SetPtEtaPhiE(99999, 99999, 99999, 99999);
 
@@ -183,47 +185,40 @@ TLorentzVector reconstructK0S(TClonesArray *branchTrack, iFinalStates iFS, doubl
     Track *trackPos;
     Track *trackNeg;
     for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iP || it == iFS.iK || it == iFS.iP) {
-            continue;
-        }
+        // exlcude tagged final states
+        if (it == iFS.iP || it == iFS.iK || it == iFS.iP) continue;
         track = (Track *)branchTrack->At(it);
-        if (track->X == 0 && track->Y == 0 && track->Z == 0) {
-            continue;
-        }
-        if (track->PID == 211) {
-            iPosS.push_back(it);
-        }
-        if (track->PID == -211) {
-            iNegS.push_back(it);
-        }
+        if (track->X == 0 && track->Y == 0 && track->Z == 0) continue;
+        if (track->PID == 211) iPosS.push_back(it);
+        if (track->PID == -211) iNegS.push_back(it);
     }
 
     Float_t mK0SDelta = 99999;
     TVector3 v3K0S;
     Int_t savediPos, savediNeg;
+    // select from candidates
     for (int ipos : iPosS) {
         trackPos = (Track *)branchTrack->At(ipos);
         for (int ineg : iNegS) {
             trackNeg = (Track *)branchTrack->At(ineg);
-            if (not(trackPos->X == trackNeg->X && trackPos->Y && trackNeg->Y && trackPos->Z == trackNeg->Z)) {
-                continue;
-            }
+            // require same direction
+            if (not(trackPos->X == trackNeg->X && trackPos->Y && trackNeg->Y && trackPos->Z == trackNeg->Z)) continue;
 
             Float_t XK0S = trackPos->X + distribution(genertator);
             Float_t YK0S = trackPos->Y + distribution(genertator);
             Float_t ZK0S = trackPos->Z + distribution(genertator);
 
-            if (Length(XK0S, YK0S, ZK0S) <= 10) {
-                continue;
-            }
-            // cout << "Pos pi vertex length: " << Length(trackPos->X, trackPos->Y, trackPos->Z) << endl;
-            // cout << "Neg pi vertex length: " << Length(trackNeg->X, trackNeg->Y, trackNeg->Z) << endl;
+            // vertex distance cut
+            if (Length(XK0S, YK0S, ZK0S) <= 10) continue;
+
             TLorentzVector piPos;
             piPos.SetPtEtaPhiM(trackPos->PT, trackPos->Eta, trackPos->Phi, 0.13957);
             TLorentzVector piNeg;
             piNeg.SetPtEtaPhiM(trackNeg->PT, trackNeg->Eta, trackNeg->Phi, 0.13957);
             TLorentzVector K0Si;
             K0Si = piPos + piNeg;
+
+            // find the pair which has mass closest to the PDG mass
             if (abs(K0Si.M() - 0.49761) < mK0SDelta) {
                 savediPos = ipos;
                 savediNeg = ineg;
@@ -231,32 +226,23 @@ TLorentzVector reconstructK0S(TClonesArray *branchTrack, iFinalStates iFS, doubl
                 K0S = K0Si;
                 mK0SDelta = abs(K0Si.M() - 0.49761);
             }
-            // cout << abs(K0Si.M() - 0.49761) << endl;
         }
     }
-    // cout << abs(K0S.M() - 0.49761) << endl;
-    // cout << Length(v3K0S.X(), v3K0S.Y(), v3K0S.Z()) << endl;
-    // cout <<endl;
 
     Float_t disTargetTr = 99999;  // closest distance between a track and the target
     Track *trackOther;
     TLorentzVector target = K0S;
     TVector3 v3Target = v3K0S;
 
+    // veto reconstructed K0S
     for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu || it == savediNeg || it == savediPos) {
-            continue;
-        }
+        if (it == iFS.iP || it == iFS.iK || it == iFS.iPi || it == iFS.iMu || it == savediNeg || it == savediPos) continue;
         trackOther = (Track *)branchTrack->At(it);
-        if (trackOther->X == 0 && trackOther->Y == 0 && trackOther->Z == 0) {
-            continue;
-        }
+        if (trackOther->X == 0 && trackOther->Y == 0 && trackOther->Z == 0) continue;
 
         TLorentzVector otherTrack;
         otherTrack.SetPtEtaPhiE(trackOther->PT, trackOther->Eta, trackOther->Phi, trackOther->P);
-        if (otherTrack.Px() * target.Px() + otherTrack.Py() * target.Py() + otherTrack.Pz() * target.Pz() <= 0) {
-            continue;
-        }
+        if (otherTrack.Px() * target.Px() + otherTrack.Py() * target.Py() + otherTrack.Pz() * target.Pz() <= 0) continue;
 
         Float_t XTr = trackOther->X + distribution(genertator);
         Float_t YTr = trackOther->Y + distribution(genertator);
@@ -266,18 +252,12 @@ TLorentzVector reconstructK0S(TClonesArray *branchTrack, iFinalStates iFS, doubl
         distance_2lines(XTr, YTr, ZTr, otherTrack.Px(), otherTrack.Py(), otherTrack.Pz(),
                         v3Target.X(), v3Target.Y(), v3Target.Z(), target.Px(), target.Py(), target.Pz(),
                         &L, &s1, &s2);
-        if (L < disTargetTr) {
-            disTargetTr = L;
-        }
-    }
-    // veto K0S
-    Float_t disK0STr = disTargetTr;
-    // disK0STr = closestTrack(iFS, K0S, v3K0S, noise, branchTrack);
-    // cout << "disTargetTr " << disK0STr << endl;
-    if (disK0STr <= 0.02) {
-        K0S.SetPtEtaPhiE(99999, 99999, 99999, 99999);
+        if (L < disTargetTr) disTargetTr = L;
     }
 
+    // veto K0S
+    Float_t disK0STr = disTargetTr;
+    if (disK0STr <= 0.02) K0S.SetPtEtaPhiE(99999, 99999, 99999, 99999);
     return K0S;
 }
 
