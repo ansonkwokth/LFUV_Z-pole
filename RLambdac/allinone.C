@@ -4,13 +4,13 @@
 #include <vector>
 using namespace std;
 
-#include "FeaturesCalculator.h"  // customized feature calculation functions
+#include "FeaturesCalculator.C"  // customized feature calculation functions
 #include "FeaturesClass.C"       // features list
 #include "FinalStatesClass.C"    // final states list
-#include "Geometry.h"            // customized geometric functions
-#include "Reconstructor.h"       // reconstruction scheme: tagged final states particles and momentum reconstruction related function
+#include "Geometry.C"            // customized geometric functions
+#include "Reconstructor.C"       // reconstruction scheme: tagged final states particles and momentum reconstruction related function
 #include "Rtypes.h"
-#include "SignalBackgroundClassifier.h"  //customized signals and backgrounds classification function, including tagging the truth final state particles
+#include "SignalBackgroundClassifier.C"  //customized signals and backgrounds classification function, including tagging the truth final state particles
 #include "TChain.h"
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
