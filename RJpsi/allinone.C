@@ -4,6 +4,9 @@
 #include <vector>
 using namespace std;
 
+#include "FeaturesClass.C"
+#include "FinalStatesClass.C"
+#include "Geometry.C"
 #include "Rtypes.h"
 #include "TChain.h"
 #include "TClonesArray.h"
@@ -31,22 +34,6 @@ class ExRootTreeReader;
 #endif
 
 */
-
-// find the final states of the decay{{{
-struct iFinalStates {
-    Int_t foundFromC = 0;
-    Int_t foundAll = 0;
-    Int_t iMuPos = 99999;
-    Int_t iMuNeg = 99999;
-    Int_t iMu = 99999;
-};
-//}}}
-
-// calculating the distance from the origin {{{
-Float_t Length(Float_t X, Float_t Y, Float_t Z) {
-    return pow(X * X + Y * Y + Z * Z, 0.5);
-}
-//}}}
 
 // return if the input is signal {{{
 Int_t ClassifySignal(TClonesArray* branchParticle, TLorentzVector* BTrue, TLorentzVector* HcTrue, TLorentzVector* muTrue, TVector3* v3HcTrue, TVector3* v3MuTrue, iFinalStates* iFSTrue, Int_t mode) {
@@ -514,180 +501,6 @@ Int_t findMuIndex(iFinalStates iFS, TClonesArray* branchTrack) {
 }
 //}}}
 
-//---------- {{{
-void distance_2lines(Float_t X1,
-                     Float_t Y1,
-                     Float_t Z1,
-                     Float_t Px1,
-                     Float_t Py1,
-                     Float_t Pz1,
-                     Float_t X2,
-                     Float_t Y2,
-                     Float_t Z2,
-                     Float_t Px2,
-                     Float_t Py2,
-                     Float_t Pz2,
-                     Float_t* L,
-                     Float_t* s1,
-                     Float_t* s2) {
-    /*calculate the closest distance between 2 lines*/
-
-    Float_t dx = X1 - X2;
-    Float_t dy = Y1 - Y2;
-    Float_t dz = Z1 - Z2;
-    // momemtum magnitude
-    Float_t P1 = pow(Px1 * Px1 + Py1 * Py1 + Pz1 * Pz1, 0.5);
-    Float_t P2 = pow(Px2 * Px2 + Py2 * Py2 + Pz2 * Pz2, 0.5);
-
-    Float_t A = (dx * Px2 + dy * Py2 + dz * Pz2) / (P2 * P2) * (Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2);
-    Float_t B = (dx * Px1 + dy * Py1 + dz * Pz1);
-    Float_t C = pow((Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2), 2) / (P1 * P1 * P2 * P2);
-
-    // parametrized 2 tracks
-    Float_t s1_ = 1 / (P1 * P1) * (A - B) / (1 - C);
-    Float_t s2_ = (B + P1 * P1 * s1_) / (Px1 * Px2 + Py1 * Py2 + Pz1 * Pz2);
-
-    // distance squared between 2 tracks
-    Float_t L_ = pow((dx + s1_ * Px1 - s2_ * Px2), 2) + pow((dy + s1_ * Py1 - s2_ * Py2), 2) + pow((dz + s1_ * Pz1 - s2_ * Pz2), 2);
-    // cout << L_ << "; " << s1_ << "; " << s2_ << endl;
-
-    *L = pow(L_, 0.5);  // change length sqaured to length
-    *s1 = s1_;
-    *s2 = s2_;
-}
-//}}}
-
-//----------{{{
-Float_t
-distance_linepoint(TVector3 v3Point, TVector3 v3Line, TLorentzVector line) {
-    Float_t proj = (line.Px() * (v3Point.X() - v3Line.X()) + line.Py() * (v3Point.Y() - v3Line.Y()) + line.Pz() * (v3Point.Z() - v3Line.Z())) / (line.P() * line.P());
-    Float_t X = proj * line.Px() - (v3Point.X() - v3Line.X());
-    Float_t Y = proj * line.Py() - (v3Point.Y() - v3Line.Y());
-    Float_t Z = proj * line.Pz() - (v3Point.Z() - v3Line.Z());
-    Float_t s = Length(X, Y, Z);
-    return s;
-}
-//}}}
-
-//---------- used in veto (used in muon and Hc) {{{
-Float_t
-closestTrack(iFinalStates iFS, TLorentzVector target, TVector3 v3Target, double noise, TClonesArray* branchTrack) {
-    Float_t disTargetTr = 99999;  // closest distance between a track and the target
-    Track* trackOther;
-
-    // inject noise, in track location
-    default_random_engine genertator;
-    normal_distribution<double> distribution(0, noise / pow(3, 0.5));
-
-    Int_t nTracks = branchTrack->GetEntries();
-    for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iMuPos || it == iFS.iMuNeg || it == iFS.iMu) {
-            continue;
-        }
-        trackOther = (Track*)branchTrack->At(it);
-        if (trackOther->X == 0 && trackOther->Y == 0 && trackOther->Z == 0) {
-            continue;
-        }
-
-        TLorentzVector otherTrack;
-        otherTrack.SetPtEtaPhiE(trackOther->PT, trackOther->Eta, trackOther->Phi, trackOther->P);
-        if (otherTrack.Px() * target.Px() + otherTrack.Py() * target.Py() + otherTrack.Pz() * target.Pz() <= 0) {
-            continue;
-        }
-
-        Float_t XTr = trackOther->X + distribution(genertator);
-        Float_t YTr = trackOther->Y + distribution(genertator);
-        Float_t ZTr = trackOther->Z + distribution(genertator);
-
-        Float_t L, s1, s2;
-        distance_2lines(XTr, YTr, ZTr, otherTrack.Px(), otherTrack.Py(), otherTrack.Pz(), v3Target.X(), v3Target.Y(), v3Target.Z(), target.Px(), target.Py(), target.Pz(), &L, &s1, &s2);
-
-        if (L < disTargetTr) { /*cout<<trackOther->PID<<"; " << L <<endl;*/
-            disTargetTr = L;
-        }
-    }
-    return disTargetTr;
-}
-//}}}
-
-//{{{
-Float_t
-closestTrack_debug(iFinalStates iFS, TLorentzVector target, TVector3 v3Target, double noise, TClonesArray* branchTrack, TClonesArray* branchParticle) {
-    Float_t disTargetTr = 99999;  // closest distance between a track and the target
-    Track* trackOther;
-
-    // inject noise, in track location
-    default_random_engine genertator;
-    normal_distribution<double> distribution(0, noise / pow(3, 0.5));
-
-    Int_t nTracks = branchTrack->GetEntries();
-    Int_t iClosest = 99999;
-    for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iMuPos || it == iFS.iMuNeg || it == iFS.iMu) {
-            continue;
-        }
-        trackOther = (Track*)branchTrack->At(it);
-        // if (Length(trackOther->X, trackOther->Y, trackOther->Z) < 1e-6) {
-        // continue; }
-        if (trackOther->X == 0 && trackOther->Y == 0 && trackOther->Z == 0) {
-            continue;
-        }
-
-        TLorentzVector otherTrack;
-        otherTrack.SetPtEtaPhiE(trackOther->PT, trackOther->Eta, trackOther->Phi, trackOther->P);
-        if (otherTrack.Px() * target.Px() + otherTrack.Py() * target.Py() + otherTrack.Pz() * target.Pz() <= 0) {
-            continue;
-        }
-
-        Float_t XTr = trackOther->X + distribution(genertator);
-        Float_t YTr = trackOther->Y + distribution(genertator);
-        Float_t ZTr = trackOther->Z + distribution(genertator);
-
-        Float_t L, s1, s2;
-        distance_2lines(XTr, YTr, ZTr, otherTrack.Px(), otherTrack.Py(), otherTrack.Pz(), v3Target.X(), v3Target.Y(), v3Target.Z(), target.Px(), target.Py(), target.Pz(), &L, &s1, &s2);
-
-        if (L < disTargetTr) {
-            iClosest = it;
-            disTargetTr = L;
-        }
-    }
-
-    if (iClosest != 99999) {
-        trackOther = (Track*)branchTrack->At(iClosest);
-        Int_t nParticles = branchParticle->GetEntries();
-        cout << "Track PID: " << trackOther->PID << endl;
-        cout << "Track location: (" << trackOther->X << ", " << trackOther->Y << ", " << trackOther->Z << ")" << endl;
-
-        Int_t iClosestTrue;
-        GenParticle* particle;
-        GenParticle* particleM;
-        GenParticle* particleMM;
-        for (int ip = 0; ip < nParticles; ip++) {
-            particle = (GenParticle*)branchParticle->At(ip);
-            if (particle->M1 == -1) {
-                continue;
-            }
-            particleM = (GenParticle*)branchParticle->At(particle->M1);
-            if (particleM->M1 == -1) {
-                continue;
-            }
-            particleMM = (GenParticle*)branchParticle->At(particleM->M1);
-
-            TLorentzVector otherTrack;
-            otherTrack.SetPtEtaPhiE(trackOther->PT, trackOther->Eta, trackOther->Phi, trackOther->P);
-            TLorentzVector otherParticle;
-            otherParticle.SetPtEtaPhiE(particle->PT, particle->Eta, particle->Phi, particle->P);
-            if (particle->X == trackOther->X && particle->Y == trackOther->Y && particle->Z == trackOther->Z && particle->PID == trackOther->PID &&
-                otherParticle.Px() * otherTrack.Px() + otherParticle.Py() * otherTrack.Py() + otherParticle.Pz() * otherTrack.Pz() > 0) {
-                iClosestTrue = ip;
-                cout << particleM->PID << " < " << particleMM->PID << endl;
-            }
-        }
-    }
-    return disTargetTr;
-}
-//}}}
-
 //----------i {{{
 TLorentzVector
 reconstructHc4Momentum(TVector3 v3B, iFinalStates iFS, TClonesArray* branchTrack, TClonesArray* branchEFlowPhoton, TClonesArray* branchEFlowNeutralHadron) {
@@ -785,55 +598,6 @@ findMisIDPi(iFinalStates iFS, TClonesArray* branchTrack) {
 }
 //}}}
 
-// Features {{{
-class Features {
-public:
-    Int_t iEvt;            // event index
-    Float_t q2;            // lepton momentum sqaured
-    Float_t miss2;         // missing mass squared
-    Float_t pB;            // b-hadron momentum
-    Float_t EB;            // b-hadron energy
-    Float_t pHc;           // c-hadron momentum
-    Float_t EHc;           // c-hadron energy
-    Float_t pMu;           // muon momentum
-    Float_t EMu;           // muon energy
-    Float_t sMinMuBVert;   // closest distance between Hc track and muon track
-                           // (=between deduced B edcay vertex and muon track)
-    Float_t sMinMuHcVert;  // closest distance between Hc decay vertex and muon
-                           // track
-    Float_t sMinMuTr;      // closest track to muon
-    Float_t sMinHcTr;      // closest track to reconstructed Hc
-    Float_t sPVHc;         // distance from PV to Hc decay vertex
-    Float_t mHcMu;         // invariant mass of Hc + mu
-    Float_t pPerp;
-    Float_t mCorr;
-    Float_t D0Max;
-    Float_t DzMax;
-    Float_t D0Sum;
-    Float_t DzSum;
-    Float_t ENeutral03;
-    Float_t ENeutral06;
-    Float_t ENeutral03Hadron;
-    Float_t ENeutral06Hadron;
-    Float_t ENeutral03Photon;
-    Float_t ENeutral06Photon;
-    Float_t ECharge03;
-    Float_t ECharge06;
-    Float_t ECharge03PV;
-    Float_t ECharge06PV;
-    Float_t ECharge03DV;
-    Float_t ECharge06DV;
-    Float_t mK0SHcMu;  // invariant mass of the reconstructed K0S + Hc + mu;
-    Float_t pK0S;      // momentum of the reconstructed K0S
-
-    Float_t q2True;
-    Float_t miss2True;
-    Float_t EBTrue;
-    Float_t pBTrue;
-    Float_t sMinMuHcVertTrue;
-};
-//}}}
-
 //----------{{{
 Float_t
 cal_pPerp(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
@@ -909,14 +673,6 @@ struct isolationVars {
     Float_t ECharge03DV = 0;
     Float_t ECharge06DV = 0;
 };
-//}}}
-
-//----------{{{
-Float_t
-Angle(Float_t X1, Float_t Y1, Float_t Z1, Float_t X2, Float_t Y2, Float_t Z2) {
-    Float_t angle = acos((X1 * X2 + Y1 * Y2 + Z1 * Z2) / (Length(X1, Y1, Z1) * Length(X2, Y2, Z2)));
-    return angle;
-}
 //}}}
 
 //---------- {{{
@@ -1124,7 +880,7 @@ reconstructK0S(TClonesArray* branchTrack, iFinalStates iFS, double noise) {
 }
 //}}}
 
-void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = false, Int_t num_test = 1000) {
+void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = true, Int_t num_test = 0) {
     cout << "\n\n\n\n\n\n\n\n\n\n"
          << endl;
     string typeName;
@@ -1134,60 +890,59 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     if (type == "s1") {
         typeName = "Bc->Jpsi tau nu. ";
         cout << "Bc->Jpsi tau nu. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/Bcjpsitaunu_50m.root";
+        inputFile = "./Bcjpsitaunu_50m.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/JpsiTauNu_10Noise_NoVeto.root";
+            outputFile = "./features/JpsiTauNu_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/JpsiTauNu_20Noise_NoVeto.root";
+            outputFile = "./features/JpsiTauNu_20Noise_NoVeto.root";
         }
     } else if (type == "s2") {
         cout << "Bc->Jpsi mu nu. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/BcJpsimunu0-2.root";
+        inputFile = "./BcJpsimunu0-2.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/JpsiMuNu_10Noise_NoVeto.root";
+            outputFile = "./features/JpsiMuNu_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/JpsiMuNu_20Noise_NoVeto.root";
+            outputFile = "./features/JpsiMuNu_20Noise_NoVeto.root";
         }
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiCombCascade_10Noise_NoVeto.root";
-        }
-        if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiCombCascade_20Noise_NoVeto.root";
+            outputFile = "./features/RJpsiCombCascade_10Noise_NoVeto.root";
+        } else if (noise_ == 20) {
+            outputFile = "./features/RJpsiCombCascade_20Noise_NoVeto.root";
         }
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiComb_10Noise_NoVeto.root";
+            outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiComb_20Noise_NoVeto.root";
+            outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
         }
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiCascade_10Noise_NoVeto.root";
+            outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiCascade_20Noise_NoVeto.root";
+            outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
         }
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiInclusive_10Noise_NoVeto.root";
+            outputFile = "./features/RJpsiInclusive_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiInclusive_20Noise_NoVeto.root";
+            outputFile = "./features/RJpsiInclusive_20Noise_NoVeto.root";
         }
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiMisID_10Noise_NoVeto.root";
+            outputFile = "./features/RJpsiMisID_10Noise_NoVeto.root";
         } else if (noise_ == 20) {
-            outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiMisID_20Noise_NoVeto.root";
+            outputFile = "./features/RJpsiMisID_20Noise_NoVeto.root";
         }
     } else {
         cout << "Not match. ";
@@ -1387,9 +1142,9 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
             // endl; cout << " ..." << iFS.iMuPos << "; " << iFS.iMuNeg << "; "
             // << iFS.iMu << endl; cout << "Closest Distance: " << disMuTr
             // <<endl;
-            if (disMuTr < 0.02) {
-                continue;
-            }
+            // if (disMuTr < 0.02) {
+            //    continue;
+            //}
             nMu += 1;
 
             // veto Hc
