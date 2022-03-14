@@ -3,7 +3,7 @@
 #include <random>
 using namespace std;
 
-#include "Geometry.h"
+#include "Geometry.C"
 #include "Rtypes.h"
 #include "TClonesArray.h"
 #include "TLorentzVector.h"

@@ -4,7 +4,7 @@ using namespace std;
 #include <vector>
 
 #include "FinalStatesClass.C"
-#include "Geometry.h"
+#include "Geometry.C"
 #include "Rtypes.h"
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
