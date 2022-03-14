@@ -6,6 +6,7 @@
 using namespace std;
 
 #include "FeaturesClass.C"
+#include "FinalStatesClass.C"
 #include "Rtypes.h"
 #include "TChain.h"
 #include "TClonesArray.h"
@@ -32,18 +33,6 @@ class ExRootResult;
 class ExRootTreeReader;
 #endif
 */
-
-//---------- find the final states of the decay {{{
-struct iFinalStates {
-    Int_t foundFromC = 0;
-    Int_t foundAll = 0;
-    Int_t iKNeg = 99999;
-    Int_t iKPos = 99999;
-    Int_t iPi = 99999;
-    Int_t iMu = 99999;
-    Int_t iPho = 99999;
-};
-//}}}
 
 //---------- calculating the distance from the origin {{{
 Float_t
