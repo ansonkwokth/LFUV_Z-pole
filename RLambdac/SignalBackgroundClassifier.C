@@ -282,7 +282,7 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
     }
 }
 
-// chck if the event is misID bkg {{{
+// chck if the event is misID bkg
 Int_t ClassifyMisID(TClonesArray *branchParticle) {
     // skip signal events
     TLorentzVector dummy;

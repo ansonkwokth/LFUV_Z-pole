@@ -1,3 +1,7 @@
+// ===================
+// === R(Lambda_c) ===
+// ===================
+
 #include <cmath>
 #include <iostream>
 #include <random>
