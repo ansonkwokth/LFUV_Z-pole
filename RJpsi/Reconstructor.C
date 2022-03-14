@@ -1,9 +1,6 @@
 #pragma once
-
 #include <iostream>
-
 using namespace std;
-
 #include <vector>
 
 #include "FinalStatesClass.C"
@@ -13,6 +10,7 @@ using namespace std;
 #include "TLorentzVector.h"
 #include "classes/DelphesClasses.h"
 
+// tage the final states particles (decay from c-hadron)
 iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
     const Float_t mMu = 0.1057;
     iFinalStates iFinalStatesIndexes;
@@ -20,16 +18,13 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
     Track* track1;
     Track* track2;
 
+    // finding proton vertex
     Int_t numMuTot = 0;
     for (int it = 0; it < nTracks; it++) {
         track1 = (Track*)branchTrack->At(it);
-        if (abs(track1->PID) == 13) {
-            numMuTot += 1;
-        }
+        if (abs(track1->PID) == 13) numMuTot += 1;
     }
-    if (numMuTot != nMu) {
-        return iFinalStatesIndexes;
-    }
+    if (numMuTot != nMu) return iFinalStatesIndexes;
 
     // finding positive muon decay vertex
     Int_t vert[nTracks];
@@ -41,9 +36,7 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
             iLoc += 1;
         }
     }
-    if (iLoc < 1) {
-        return iFinalStatesIndexes;
-    }
+    if (iLoc < 1) return iFinalStatesIndexes;
 
     Int_t foundMuNeg = 0;
     Int_t iMuPos, iMuNeg;
@@ -51,8 +44,6 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
     // finding same vertex oppositive charge pion
     for (int iar = 0; iar < iLoc; iar++) {
         track1 = (Track*)branchTrack->At(vert[iar]);
-        // cout<< iar  <<endl;
-        // Int_t foundMuNegi = 0;
         for (int it2 = 0; it2 < nTracks; it2++) {
             // same vertex
             track2 = (Track*)branchTrack->At(it2);
@@ -63,35 +54,25 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
                 mu2.SetPtEtaPhiM(track2->PT, track2->Eta, track2->Phi, mMu);
                 Hc = mu1 + mu2;
                 if (abs(Hc.M() - 3.09) < diffM) {
-                    // cout<< Hc.M() <<endl;
                     diffM = abs(Hc.M() - 3.09);
                     iMuPos = vert[iar];
                     iMuNeg = it2;
-                    // foundMuNegi = 1;
                     foundMuNeg = 1;
                 } else {
                     continue;
                 }
-                /*
-                iMuPos = vert[iar];
-                iMuNeg = it2;
-                foundMuNeg = 1;
-                break;
-                */
             }
         }
-        // if (foundMuNeg == 1) { break; }
     }
 
-    if (not(foundMuNeg == 1)) {
-        return iFinalStatesIndexes;
-    }
+    if (not(foundMuNeg == 1)) return iFinalStatesIndexes;
     iFinalStatesIndexes.iMuPos = iMuPos;
     iFinalStatesIndexes.iMuNeg = iMuNeg;
     iFinalStatesIndexes.foundFromC = 1;
     return iFinalStatesIndexes;
 }
 
+// tag unpaired muon from b-hadron
 Int_t findMuIndex(iFinalStates iFS, TClonesArray* branchTrack) {
     Int_t nTracks = branchTrack->GetEntries();
     Track* trackMu;
@@ -105,14 +86,12 @@ Int_t findMuIndex(iFinalStates iFS, TClonesArray* branchTrack) {
             foundMu += 1;
         }
     }
-    if (foundMu != 1) {
-        return 99999;
-    }
+    if (foundMu != 1) return 99999;
     return iMu;
 }
 
-TLorentzVector
-reconstructB4Momentum(TVector3 v3B, iFinalStates iFS, TClonesArray* branchTrack, TClonesArray* branchEFlowPhoton, TClonesArray* branchEFlowNeutralHadron) {
+// deduce b-hadron 4 momentum be Z boson 2 body decay
+TLorentzVector reconstructB4Momentum(TVector3 v3B, iFinalStates iFS, TClonesArray* branchTrack, TClonesArray* branchEFlowPhoton, TClonesArray* branchEFlowNeutralHadron) {
     const Float_t mK0 = 0.497661;
     const Float_t mBc = 6.2749;
     TLorentzVector signalHemi, recoilHemi, pRem;
@@ -133,9 +112,7 @@ reconstructB4Momentum(TVector3 v3B, iFinalStates iFS, TClonesArray* branchTrack,
             chargedPi.SetPtEtaPhiE(track->PT, track->Eta, track->Phi, track->P);
             if (chargedPi.Px() * v3B.X() + chargedPi.Py() * v3B.Y() + chargedPi.Pz() * v3B.Z() > 0) {
                 signalHemi += chargedPi;
-                if (it != iFS.iMuPos && it != iFS.iMuNeg && it != iFS.iMu) {
-                    pRem += chargedPi;
-                }
+                if (it != iFS.iMuPos && it != iFS.iMuNeg && it != iFS.iMu) pRem += chargedPi;
             } else {
                 recoilHemi += chargedPi;
             }
@@ -183,22 +160,19 @@ reconstructB4Momentum(TVector3 v3B, iFinalStates iFS, TClonesArray* branchTrack,
     return B;
 }
 
-vector<Int_t>
-findMisIDPi(iFinalStates iFS, TClonesArray* branchTrack) {
+// find misID pion, specific to misID bkg type
+vector<Int_t> findMisIDPi(iFinalStates iFS, TClonesArray* branchTrack) {
     vector<Int_t> iPiS;
     Int_t nTracks = branchTrack->GetEntries();
     Track* track;
     for (int it = 0; it < nTracks; it++) {
-        if (it == iFS.iMuPos || it == iFS.iMuNeg || it == iFS.iMu) {
-            continue;
-        }
+        // exclude tagged final states
+        if (it == iFS.iMuPos || it == iFS.iMuNeg || it == iFS.iMu) continue;
         track = (Track*)branchTrack->At(it);
-        if (abs(track->PID) != 211) {
-            continue;
-        }
-        if (track->X == 0 && track->Y == 0 && track->Z == 0) {
-            continue;
-        }
+        // find pion
+        if (abs(track->PID) != 211) continue;
+        // same direction
+        if (track->X == 0 && track->Y == 0 && track->Z == 0) continue;
         iPiS.push_back(it);
     }
     return iPiS;

@@ -1,3 +1,7 @@
+// =================
+// === R(J/\psi) ===
+// =================
+
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -22,87 +26,64 @@ using namespace std;
 R__ADD_LIBRARY_PATH($DELPHES)
 R__LOAD_LIBRARY(libDelphes)
 
-/*
-//Load Delphes for reading the data
-#ifdef __CLING__
-R__ADD_LIBRARY_PATH($DELPHES)
-R__LOAD_LIBRARY(libDelphes)
+void allinone(
+    const string type,          // data types (signal channel, and background types)
+    const Float_t noise_ = 10,  // amount of noise injected to vertex location (unit of microns)
+    const Bool_t save = true,   // saving the output features file (.root)
+    Int_t num_test = 0) {       // number of events to be ran (default 0: run all)
 
-#include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootResult.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
-#else
-class ExRootResult;
-class ExRootTreeReader;
-#endif
+    cout << "\n\n\n\n\n\n\n\n\n\n\n";
 
-*/
-void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = true, Int_t num_test = 0) {
-    cout << "\n\n\n\n\n\n\n\n\n\n"
-         << endl;
     string typeName;
     const char* inputFile;
     const char* outputFile;
-    const Float_t noise = noise_ * 0.001;
+    const Float_t noise = noise_ * 0.001;  // change unit
+
     if (type == "s1") {
-        typeName = "Bc->Jpsi tau nu. ";
         cout << "Bc->Jpsi tau nu. " << endl;
         inputFile = "./Bcjpsitaunu_50m.root";
-        if (noise_ == 10) {
-            outputFile = "./features/JpsiTauNu_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/JpsiTauNu_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/JpsiTauNu_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/JpsiTauNu_20Noise_NoVeto.root";
+
     } else if (type == "s2") {
         cout << "Bc->Jpsi mu nu. " << endl;
         inputFile = "./BcJpsimunu0-2.root";
-        if (noise_ == 10) {
-            outputFile = "./features/JpsiMuNu_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/JpsiMuNu_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/JpsiMuNu_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/JpsiMuNu_20Noise_NoVeto.root";
+
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) {
-            outputFile = "./features/RJpsiCombCascade_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/RJpsiCombCascade_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/RJpsiCombCascade_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiCombCascade_20Noise_NoVeto.root";
+
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) {
-            outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
+
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) {
-            outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
+
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) {
-            outputFile = "./features/RJpsiInclusive_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/RJpsiInclusive_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto.root";
+
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) {
-            outputFile = "./features/RJpsiMisID_10Noise_NoVeto.root";
-        } else if (noise_ == 20) {
-            outputFile = "./features/RJpsiMisID_20Noise_NoVeto.root";
-        }
+        if (noise_ == 10) outputFile = "./features/RJpsiMisID_10Noise_NoVeto.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiMisID_20Noise_NoVeto.root";
+
     } else {
         cout << "Not match. ";
+        return;
     }
 
     // Load lib, and read data
@@ -118,6 +99,11 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     TClonesArray* branchEFlowPhoton = treeReader->UseBranch("EFlowPhoton");
     TClonesArray* branchEFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
 
+    GenParticle* particle;
+    Track* track;
+    Tower* eflowphoton;
+    Tower* eflowneutralhadron;
+
     // inject noise
     std::default_random_engine genertator;
     std::normal_distribution<double> distribution(0, noise / pow(3, 0.5));
@@ -132,11 +118,6 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     const Float_t mTau = 1.777;
     const Float_t mLambdab = 5.61960;
 
-    GenParticle* particle;
-    Track* track;
-    Tower* eflowphoton;
-    Tower* eflowneutralhadron;
-
     // Count number of targeted events
     Int_t nEvt = 0;
     Int_t nFoundTracks = 0;
@@ -148,13 +129,11 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     Int_t num = 0;
 
     // output daata
-    if (not save) {
-        outputFile = "dummy.root";
-    }
+    if (not save) outputFile = "dummy.root";
+
     TFile fea(outputFile, "recreate");
     TTree tr("t", "features");
     Features* features = new Features;
-    // Features features;
     tr.Branch("features", &features);
 
     cout << "\nReconstructing: " << typeName << endl;
@@ -162,31 +141,20 @@ void allinone(const string type, const Float_t noise_ = 10, const Bool_t save = 
     cout << "Injected noise:\t" << noise_ << " microns (" << noise << "mm)" << endl;
     cout << "Save: " << save << endl;
     cout << "Writing to:\t" << outputFile << endl;
-    cout << "# of events:\t" << numberOfEntries << "\n"
-         << endl;
-    if (num_test == 0) {
-        num_test = numberOfEntries;
-    }
+    cout << "# of events:\t" << numberOfEntries << "\n\n";
+    if (num_test == 0) num_test = numberOfEntries;
 
-    for (Int_t i_en = 0; i_en < numberOfEntries; i_en++) {
-        // for (Int_t i_en=0; i_en<num_test; i_en++) {
-        // if (i_en % 1000 == 0) {cout << "\tReconstruction Progress: " << i_en
-        // << "/" << numberOfEntries; } if ((i_en % 1000) == 0) {cout <<
-        // "\rReconstruction Progress: " << i_en << "/" << numberOfEntries; }
-        if ((i_en % 100000) == 0) {
-            cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
-        }
-        if (i_en >= num_test) {
-            break;
-        }
+    // loop over events
+    for (Int_t i_en = 0; i_en < num_test; i_en++) {
+        if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
+
         treeReader->ReadEntry(i_en);  // reading the entry
 
         //==========================================================================
-        //===============   Classifying in event type in truth level
-        //===============
+        //===============   Classifying in event type in truth level ===============
         //==========================================================================
-        iFinalStates iFSTrue;
-        TLorentzVector BTrue, HcTrue, muTrue;
+        iFinalStates iFSTrue;                  // final states, in truth level
+        TLorentzVector BTrue, HcTrue, muTrue;  // define lorentz vector for the truth level
         TVector3 v3HcTrue, v3MuTrue;
         Int_t passing = 0;
 
