@@ -22,8 +22,12 @@ Float_t calCosinceTheta(TLorentzVector p1, TLorentzVector p2) {
 }
 //}}}
 
-// calculate number of b's and c's
-void calBsCs(TClonesArray* branchParticle, bool printOut = false) {
+// calculate number of b's and c's{{{
+void calBsCs(TClonesArray* branchParticle,
+             Int_t* nB_, Int_t* nC_,
+             Float_t* E1_, Float_t* E2_,
+             Float_t* angle1_, Float_t* angle2_,
+             bool printOut = false) {
     Int_t nParticles = branchParticle->GetEntries();
     Int_t levels[100];
     Int_t iLevel = 0;
@@ -134,7 +138,15 @@ void calBsCs(TClonesArray* branchParticle, bool printOut = false) {
     }
     sort(angles, angles + iAngles);
     sort(energies, energies + iEnergies);
+
+    *nB_ = nB;
+    *nC_ = nC;
+    *E1_ = energies[0];
+    *E2_ = energies[1];
+    *angle1_ = angles[0];
+    *angle2_ = angles[1];
 }
+//}}}
 
 //{{{
 class FWMoments {
@@ -181,7 +193,7 @@ FWMoments updateFWMs(Float_t E1, Float_t E2, Float_t cosine_theta, FWMoments FWM
 //}}}
 
 Int_t nEvt = 0;
-void event_shape_bkg_(const string type, const Bool_t save = false, Int_t num_test = 100, bool printOut = false) {
+void eventshape(const string type, const Bool_t save = false, Int_t num_test = 0, bool printOut = false) {
     cout << "\n\n\n\n\n\n\n\n\n\n";
 
     string typeName;
@@ -198,12 +210,14 @@ void event_shape_bkg_(const string type, const Bool_t save = false, Int_t num_te
         outputFile = "./features/JpsiMuNu_FWM.root";
     } else if (type == "b1") {
         cout << "Comb+CascadeBkg. " << endl;
-        inputFile = "~/Projects/LFUV/RJpsi/RJpsi_comb_200m_seed1.root";
-        outputFile = "~/Projects/LFUV/RJpsi/features/RJpsiCombCascade_FWM.root";
+        inputFile = "./RJpsi_comb_200m_seed1.root";
+        outputFile = "./features/RJpsiCombCascade_FWM.root";
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        outputFile = "./features/RJpsiInclusive_FWM.root";
+        // inputFile = "./RJpsi_comb_200m_seed1.root";
+        // outputFile = "./features/RJpsiInclusive_FWM.root";
+        inputFile = "./RJpsi_comb_200m_seed2.root";
+        outputFile = "./features/RJpsiInclusive_FWM_seed2.root";
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
@@ -277,7 +291,15 @@ void event_shape_bkg_(const string type, const Bool_t save = false, Int_t num_te
 
         if (type == "b1" || type == "b4") {
             if (printOut) cout << "\n============ Event: " << i_en << " ===================" << endl;
-            calBsCs(branchParticle, printOut);
+            Int_t nB, nC;
+            Float_t E1, E2, angle1, angle2;
+            calBsCs(branchParticle, &nB, &nC, &E1, &E2, &angle1, &angle2, printOut);
+            FWMs->nB = nB;
+            FWMs->nC = nC;
+            FWMs->E1 = E1;
+            FWMs->E2 = E2;
+            FWMs->angle1 = angle1;
+            FWMs->angle2 = angle2;
         }
 
         Int_t nTracks = branchTrack->GetEntries();
