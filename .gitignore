@@ -2,3 +2,6 @@
 *figures*
 *features*
 *.ipynb_checkpoints
+*.hepmc
+*_temp*
+
