@@ -149,6 +149,10 @@ void allinone(
 
     // Count number of targeted events
     Int_t nEvt = 0;
+    Int_t nFoundFinalStates = 0;
+    Int_t nRecoHc = 0;
+    Int_t nRecoHb = 0;
+
     Int_t nFoundTracks = 0;
     Int_t nMu = 0;
     Int_t nSameDir = 0;
@@ -156,6 +160,7 @@ void allinone(
     Int_t nMuPt = 0;
     Int_t nVert = 0;
     Int_t num = 0;
+    Int_t nPi_MisID = 0;  // total number of possible mis-id event (before preselection)
 
     // output daata
     if (not save) outputFile = "dummy.root";
@@ -176,7 +181,6 @@ void allinone(
 
     // loop over events
     for (Int_t i_en = 0; i_en < num_test; i_en++) {
-        // progress
         if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
 
         treeReader->ReadEntry(i_en);  // reading the entry
@@ -188,6 +192,7 @@ void allinone(
         TLorentzVector BTrue, HcTrue, muTrue, phoTrue;  // define lorentz vectors for the truh level
         TVector3 v3HcTrue, v3MuTrue;
         Int_t passing = 0;
+        Int_t nPi_MisID_i = 0;
         // check if the event pass the classification of the correspdoning event type
         // and store the truth level info (for signal types)
         if (type == "s1") {
@@ -201,13 +206,14 @@ void allinone(
         } else if (type == "b1" || type == "b1" || type == "b2" || type == "b3" || type == "b4") {
             passing = ClassifyBkg(branchParticle, type);
         } else if (type == "b5") {
-            passing = ClassifyMisID(branchParticle);
+            passing = ClassifyMisID(branchParticle, &nPi_MisID_i);
         } else {
             cout << " No such Signal/Bkg" << endl;
         }
         if (passing == 0) continue;
 
         nEvt += 1;  // count number of truth level events
+        nPi_MisID += nPi_MisID_i;
 
         //==========================================================================
         //===============   Finding the correspdoning final states   ===============
@@ -219,7 +225,6 @@ void allinone(
         // finding the indices of those from targeted c-hadron decay first
         iFinalStates iFS = FindFinalStatesIndex(branchTrack);
         if (iFS.foundFromC == 0) continue;
-        nFoundTracks += 1;
 
         vector<Int_t> muCandidates;  // indices of muon candidates
         if (type == "b5") {          // if it is to calculate midIS, find pions instead of muons
@@ -233,11 +238,11 @@ void allinone(
             if (imu == 99999) continue;  // if not found any
 
             iFS.iMu = imu;  // add muon index to the final states list
+            nFoundFinalStates += 1;
 
             //==========================================================================
             //==================   Defining 4 Momentum & 3 Positions  ==================
             //==========================================================================
-
             Track* KNegTrack = (Track*)branchTrack->At(iFS.iKNeg);  // negative kaon
             Track* KPosTrack = (Track*)branchTrack->At(iFS.iKPos);  // positive kaon
             Track* piTrack = (Track*)branchTrack->At(iFS.iPi);      // pion
@@ -251,15 +256,6 @@ void allinone(
             pi.SetPtEtaPhiM(piTrack->PT, piTrack->Eta, piTrack->Phi, mPi);
             TLorentzVector mu;
             mu.SetPtEtaPhiM(muTrack->PT, muTrack->Eta, muTrack->Phi, mMu);
-
-            // check direction of the tracks
-            if (KNeg.Px() * KPos.Px() + KNeg.Py() * KPos.Py() + KNeg.Pz() * KPos.Pz() <= 0) continue;
-            if (KNeg.Px() * KNeg.Px() + KNeg.Py() * KNeg.Py() + KNeg.Pz() * KNeg.Pz() <= 0) continue;
-            if (KNeg.Px() * mu.Px() + KNeg.Py() * mu.Py() + KNeg.Pz() * mu.Pz() <= 0) continue;
-            if (KPos.Px() * pi.Px() + KPos.Py() * pi.Py() + KPos.Pz() * pi.Pz() <= 0) continue;
-            if (KPos.Px() * mu.Px() + KPos.Py() * mu.Py() + KPos.Pz() * mu.Pz() <= 0) continue;
-            if (pi.Px() * mu.Px() + pi.Py() * mu.Py() + pi.Pz() * mu.Pz() <= 0) continue;
-            nSameDir += 1;
 
             // reconstruct c-hadron
             TLorentzVector Hc;
@@ -279,57 +275,60 @@ void allinone(
             Float_t dzMu = distribution(genertator);
             TVector3 v3MuNoise(dxMu, dyMu, dzMu);
             TVector3 v3Mu(muTrack->X, muTrack->Y, muTrack->Z);
+            if (Length(v3Mu.X(), v3Mu.Y(), v3Mu.Z()) <= 0) continue;  // avoid the PV muon, if adding noise to make it accidently pass the cut
             v3Mu += v3MuNoise;
 
-            //==========================================================================
-            //========================   Vetoing muon and Hc   =========================
-            //==========================================================================
-            // veto muon
-            Float_t disMuTr;
-            disMuTr = closestTrack(iFS, mu, v3Mu, noise, branchTrack);
-            if (disMuTr < 0.02) continue;
-            nMu += 1;
-
+            // ================================
+            // ==========   Ds cut   ==========
+            // ================================
+            // c-hadron vertex distance cut
+            if (Length(v3C.X(), v3C.Y(), v3C.Z()) < 0.5) continue;
+            //  KK mass cut
+            TLorentzVector KK;
+            KK = KPos + KNeg;
+            if (not(KK.M() >= 1.008 && KK.M() <= 1.032)) continue;
+            //  c-hadron mass cut
+            if (not(Hc.M() >= 1.945 && Hc.M() <= 1.995)) continue;
             // veto Hc
             Float_t disHcTr;
             disHcTr = closestTrack(iFS, Hc, v3C, noise, branchTrack);
             if (disHcTr < 0.02) continue;
+            nRecoHc += 1;
 
-            //==========================================================================
-            //=============================   Apply cuts   =============================
-            //==========================================================================
-            // c-hadron mass cut
-            if (not(Hc.M() >= 1.945 && Hc.M() <= 1.995)) continue;
-            nHcMass += 1;
-
-            TLorentzVector KK;
-            KK = KPos + KNeg;
-            if (not(KK.M() >= 1.008 && KK.M() <= 1.032)) continue;
-
-            if (not(mu.Pt() > 1.2)) continue;
+            // ===========================================
+            // ==========   unpaired muon cut   ==========
+            // ===========================================
+            // need to be from Signal hemisphere
+            if (not(v3Mu.X() * v3C.X() + v3Mu.Y() * v3C.Y() + v3Mu.Z() * v3C.Z() > 0)) continue;
             // muon pT cut
-            nMuPt += 1;
+            if (not(mu.Pt() > 1.2)) continue;
+            // veto muon
+            Float_t disMuTr;
+            disMuTr = closestTrack(iFS, mu, v3Mu, noise, branchTrack);
+            if (disMuTr < 0.02) continue;
+
+            // ===============================================
+            // ==========   m(K K pi mu) mass cut   ==========
+            // ===============================================
+            // invariant mass (of reconstructed b-hadron) cut
+            TLorentzVector HcMu;
+            HcMu = KNeg + KPos + pi + mu;
+            if (HcMu.M() > mBs) continue;
 
             //==========================================================================
             //=======================   Deduce B decay vertex   ========================
             //==========================================================================
-            // c-hadron vertex distance cut
-            if (Length(v3C.X(), v3C.Y(), v3C.Z()) < 0.05) continue;
-
             // tracks distance cut
             Float_t LHcMu, sHc, sMu;
             distance_2lines(v3C.X(), v3C.Y(), v3C.Z(), Hc.Px(), Hc.Py(), Hc.Pz(),
                             v3Mu.X(), v3Mu.Y(), v3Mu.Z(), mu.Px(), mu.Py(), mu.Pz(),
                             &LHcMu, &sHc, &sMu);
-            if (LHcMu > 0.5) continue;
 
             // deduced location
             Float_t X = v3C.X() + sHc * Hc.Px();
             Float_t Y = v3C.Y() + sHc * Hc.Py();
             Float_t Z = v3C.Z() + sHc * Hc.Pz();
             TVector3 v3B(X, Y, Z);
-            if (Length(v3C.X(), v3C.Y(), v3C.Z()) < 0.05) continue;
-            nVert += 1;
 
             //==========================================================================
             //===========================   Reconstruct B   ============================
@@ -339,50 +338,41 @@ void allinone(
             if (isnan(B.P())) continue;
             if (B.Px() == 99999 && B.Py() == 99999 && B.Pz() == 99999 && B.E() == 99999) continue;
 
-            // invariant mass (of reconstructed b-hadron) cut
-            TLorentzVector HcMu;
-            HcMu = KNeg + KPos + pi + mu;
-            if (HcMu.M() > mBs) continue;
-
             //==========================================================================
             //==============================   Features   ==============================
             //==========================================================================
+            // event index
+            features->iEvt = i_en;
             // q2
             TLorentzVector q;
             q = B - Hc;
             Float_t q2 = q.E() * q.E() - q.P() * q.P();
             if (q2 < -10 || q2 > 15) continue;
             features->q2 = q2;
-
             // miss2
             TLorentzVector miss;
             miss = B - Hc - mu;
             features->miss2 = miss.E() * miss.E() - miss.P() * miss.P();
-
             // pB, EB
             features->pB = B.P();
             features->EB = B.E();
-
             // pHc, EHc
             features->pHc = Hc.P();
             features->EHc = Hc.E();
-
             // pMu, EMu
             features->pMu = mu.P();
             features->EMu = mu.E();
-
             // distances
-            features->sMinMuBVert = pow(LHcMu, 0.5);
+            features->sMinMuBVert = LHcMu;
             features->sMinMuHcVert = distance_linepoint(v3C, v3Mu, mu);
             features->sMinMuTr = disMuTr;
             features->sMinHcTr = disHcTr;
             features->sPVHc = Length(v3C.X(), v3C.Y(), v3C.Z());
             features->mHcMu = HcMu.M();
-
             // p_perp, m_corr
+            // features->pPerpHc = cal_pPerp_Hc(v3B, Hc);
             features->pPerp = cal_pPerp(v3B, Hc, mu);
             features->mCorr = cal_mCorr(v3B, Hc, mu);
-
             // impact parameters
             impactParams impParams;
             impParams = FindImpactParams(branchTrack, iFS, v3B);
@@ -390,14 +380,12 @@ void allinone(
             features->D0Sum = impParams.D0Sum;
             features->DzMax = impParams.DzMax;
             features->DzSum = impParams.DzSum;
-
             // finding the photon, for modifying the width of \Delta m peak
             whichPhoton wPho;
             wPho = calDeltaM(branchEFlowPhoton, Hc, phoTrue, alpha);
             features->DeltaM = wPho.DeltaM;
             features->correctPhoton = wPho.correctPhoton;
             iFS.iPho = wPho.iPho;
-
             // isolation variables
             isolationVars isoVars;
             isoVars = FindIsolationVars(branchTrack, branchEFlowNeutralHadron, branchEFlowPhoton, iFS, Hc);
@@ -457,21 +445,29 @@ void allinone(
             tr.Fill();
 
             // count the final reconstructed events
-            num += 1;
+            nRecoHb += 1;
         }
     }
 
     cout << endl;
     cout << endl;
     cout << endl;
-    cout << "Number of Events: \t\t" << nEvt << endl;
-    cout << "Matched vertex: \t\t" << nFoundTracks << endl;
-    cout << "All in same direction: \t\t" << nSameDir << endl;
-    cout << "Matched muon: \t\t\t" << nMu << endl;
-    cout << "Hc in mass range: \t\t" << nHcMass << endl;
-    cout << "Mu PT cut: \t\t\t" << nMuPt << endl;
-    cout << "Deduced vertex cut: \t\t" << nVert << endl;
-    cout << "Number of Reconstrcutions: \t" << num << " / " << nEvt << endl;
+    if (type == "b5") {
+        cout << "Number of mid-id: \t\t" << nPi_MisID << endl;
+    }
+    cout << " Number of Events: \t\t" << nEvt << endl;
+    cout << " Found all final states: \t" << nFoundFinalStates << endl;
+    cout << " Reconstructed Hc: \t\t" << nRecoHc << endl;
+    cout << " Number of Reconstructions: \t" << nRecoHb << endl;
+    cout << " \t\t\tEff.: \t" << 100 * float(nRecoHb) / float(nEvt) << "%" << endl;
+
+    // cout << "Matched vertex: \t\t" << nFoundTracks << endl;
+    // cout << "All in same direction: \t\t" << nSameDir << endl;
+    // cout << "Matched muon: \t\t\t" << nMu << endl;
+    // cout << "Hc in mass range: \t\t" << nHcMass << endl;
+    // cout << "Mu PT cut: \t\t\t" << nMuPt << endl;
+    // cout << "Deduced vertex cut: \t\t" << nVert << endl;
+    // cout << nFoundFinalStates << endl;
 
     if (save) {
         tr.Write();

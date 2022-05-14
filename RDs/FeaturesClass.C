@@ -1,22 +1,23 @@
 
 class Features {
 public:
-    Int_t iEvt;                // event index
-    Float_t q2;                // lepton momentum sqaured
-    Float_t miss2;             // missing mass squared
-    Float_t pB;                // b-hadron momentum
-    Float_t EB;                // b-hadron energy
-    Float_t pHc;               // c-hadron momentum
-    Float_t EHc;               // c-hadron energy
-    Float_t pMu;               // muon momentum
-    Float_t EMu;               // muon energy
-    Float_t sMinMuBVert;       // closest distance between Hc track and muon track (=between deduced B edcay vertex and muon track)
-    Float_t sMinMuHcVert;      // closest distance between Hc decay vertex and muon track
-    Float_t sMinMuTr;          // closest track to muon
-    Float_t sMinHcTr;          // closest track to reconstructed Hc
-    Float_t sPVHc;             // distance from PV to Hc decay vertex
-    Float_t mHcMu;             // invariant mass of Hc + mu
-    Float_t pPerp;             // from arXiv:2001.03225v2 eqn3
+    Int_t iEvt;            // event index
+    Float_t q2;            // lepton momentum sqaured
+    Float_t miss2;         // missing mass squared
+    Float_t pB;            // b-hadron momentum
+    Float_t EB;            // b-hadron energy
+    Float_t pHc;           // c-hadron momentum
+    Float_t EHc;           // c-hadron energy
+    Float_t pMu;           // muon momentum
+    Float_t EMu;           // muon energy
+    Float_t sMinMuBVert;   // closest distance between Hc track and muon track (=between deduced B edcay vertex and muon track)
+    Float_t sMinMuHcVert;  // closest distance between Hc decay vertex and muon track
+    Float_t sMinMuTr;      // closest track to muon
+    Float_t sMinHcTr;      // closest track to reconstructed Hc
+    Float_t sPVHc;         // distance from PV to Hc decay vertex
+    Float_t mHcMu;         // invariant mass of Hc + mu
+    Float_t pPerp;         // from arXiv:2001.03225v2 eqn3
+    // Float_t pPerpHc;
     Float_t mCorr;             // from arXiv:2001.03225v2 eqn3
     Float_t D0Max;             // max. of particle transverse impact parameter
     Float_t DzMax;             // max. of particle longitudinal impact parameter

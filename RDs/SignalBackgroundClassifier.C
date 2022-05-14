@@ -431,7 +431,7 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
     }
 }
 
-Int_t ClassifyMisID(TClonesArray* branchParticle) {
+Int_t ClassifyMisID(TClonesArray* branchParticle, Int_t* nPi_) {
     // skip signal events
     TLorentzVector dummy;
     TVector3 dummy2;
@@ -468,6 +468,7 @@ Int_t ClassifyMisID(TClonesArray* branchParticle) {
         }
         if (not(nPi >= 2)) return 0;
 
+        *nPi_ = nPi;
         return 1;
     }
 }

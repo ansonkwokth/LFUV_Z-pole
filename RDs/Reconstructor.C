@@ -26,6 +26,7 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack) {
         if (track1->PID == 321 && Length(track1->X, track1->Y, track1->Z) > 0) {
             vert[iLoc] = it;
             iLoc += 1;
+            // cout << "---1" << endl;
         }
     }
     if (iLoc < 1) return iFinalStatesIndexes;
@@ -40,9 +41,14 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack) {
         for (int it2 = 0; it2 < nTracks; it2++) {
             // same vertex K (negative)
             track2 = (Track*)branchTrack->At(it2);
+            // cout << endl;
+            // cout << vert[iar] << "; " << it2 << endl;
+            // cout << track1->X << "; " << track1->Y << "; " << track1->Z << "; " << endl;
+            // cout << track2->X << "; " << track2->Y << "; " << track2->Z << "; " << endl;
             if (track2->PID == -321 &&
                 track1->X == track2->X && track1->Y == track2->Y && track1->Z == track2->Z &&
                 track1->Charge + track2->Charge == 0) {
+                // cout << "---2" << endl;
                 foundPi = 0;
                 // same vertex pi
                 for (int it3 = 0; it3 < nTracks; it3++) {
@@ -53,6 +59,7 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack) {
                         iPi = it3;
                         foundK = 1;
                         foundPi = 1;
+                        // cout << "---3" << endl;
                         break;
                     }
                 }
