@@ -283,7 +283,7 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
 }
 
 // chck if the event is misID bkg
-Int_t ClassifyMisID(TClonesArray *branchParticle) {
+Int_t ClassifyMisID(TClonesArray *branchParticle, Int_t *nPi_) {
     // skip signal events
     TLorentzVector dummy;
     TVector3 dummy2;
@@ -311,6 +311,8 @@ Int_t ClassifyMisID(TClonesArray *branchParticle) {
             if (abs(particle->PID) == 211 && (not(particle->X == 0 && particle->Y == 0 && particle->Z == 0))) nPi += 1;
         }
         if (not(nPi >= 2)) return 0;
+
+        *nPi_ = nPi;
         return 1;
     }
 }

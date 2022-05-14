@@ -17,6 +17,7 @@ public:
     Float_t sPVHc;         // distance from PV to Hc decay vertex
     Float_t mHcMu;         // invariant mass of Hc + mu
     Float_t pPerp;
+    // Float_t pPerpHc;
     Float_t mCorr;
     Float_t D0Max;
     Float_t DzMax;
