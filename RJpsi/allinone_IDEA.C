@@ -1,6 +1,7 @@
 // =================
 // === R(J/\psi) ===
 // =================
+// Using IDEA delphes card
 
 #include <cmath>
 #include <iostream>
@@ -12,7 +13,7 @@ using namespace std;
 #include "FeaturesClass.C"
 #include "FinalStatesClass.C"
 #include "Geometry.C"
-#include "Reconstructor.C"
+#include "Reconstructor_IDEA.C"
 #include "Rtypes.h"
 #include "SignalBackgroundClassifier.C"
 #include "TChain.h"
@@ -26,7 +27,7 @@ using namespace std;
 R__ADD_LIBRARY_PATH($DELPHES)
 R__LOAD_LIBRARY(libDelphes)
 
-void allinone(
+void allinone_IDEA(
     const string type,          // data types (signal channel, and background types)
     const Float_t noise_ = 10,  // amount of noise injected to vertex location (unit of microns)
     const Bool_t save = true,   // saving the output features file (.root)
@@ -41,45 +42,13 @@ void allinone(
 
     if (type == "s1") {
         cout << "Bc->Jpsi tau nu. " << endl;
-        inputFile = "./Bcjpsitaunu_50m.root";
-        if (noise_ == 10) outputFile = "./features/JpsiTauNu_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/JpsiTauNu_20Noise_NoVeto.root";
+        inputFile = "./IDEA_card_Bcjpsitaunu_50m_2.root";
+        if (noise_ == 10) outputFile = "./features/IDEA_card_JpsiTauNu_10Noise_NoVeto.root";
 
     } else if (type == "s2") {
         cout << "Bc->Jpsi mu nu. " << endl;
-        inputFile = "./BcJpsimunu0-2.root";
-        if (noise_ == 10) outputFile = "./features/JpsiMuNu_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/JpsiMuNu_20Noise_NoVeto.root";
-
-    } else if (type == "b1") {
-        cout << "Comb+Cascade Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiCombCascade_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiCombCascade_20Noise_NoVeto.root";
-
-    } else if (type == "b2") {
-        cout << "Comb Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
-
-    } else if (type == "b3") {
-        cout << "Cascade Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
-
-    } else if (type == "b4") {
-        cout << "Inclusive Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto.root";
-
-    } else if (type == "b5") {
-        cout << "MisID Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiMisID_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiMisID_20Noise_NoVeto.root";
+        inputFile = "./IDEA_card_BcJpsimunu0-2.root";
+        if (noise_ == 10) outputFile = "./features/IDEA_card_JpsiMuNu_10Noise_NoVeto.root";
 
     } else {
         cout << "Not match. ";
@@ -220,8 +189,13 @@ void allinone(
             Float_t dzMu = distribution(genertator);
             TVector3 v3CNoise(dxC, dyC, dzC);
             TVector3 v3MuNoise(dxMu, dyMu, dzMu);
-            TVector3 v3C(muPosTrack->X, muPosTrack->Y, muPosTrack->Z);
-            TVector3 v3Mu(muTrack->X, muTrack->Y, muTrack->Z);
+
+            GenParticle* muPosTrackObj = (GenParticle*)muPosTrack->Particle.GetObject();
+            TVector3 v3C(muPosTrackObj->X, muPosTrackObj->Y, muPosTrackObj->Z);
+
+            GenParticle* muTrackObj = (GenParticle*)muTrack->Particle.GetObject();
+            TVector3 v3Mu(muTrackObj->X, muTrackObj->Y, muTrackObj->Z);
+
             if (Length(v3Mu.X(), v3Mu.Y(), v3Mu.Z()) <= 0) continue;  // avoid the PV muon, if adding noise to make it accidently pass the cut
             v3Mu += v3MuNoise;
             v3C += v3CNoise;

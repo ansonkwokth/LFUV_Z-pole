@@ -10,15 +10,15 @@ using namespace std;
 #include "TLorentzVector.h"
 #include "classes/DelphesClasses.h"
 
-// tage the final states particles (decay from c-hadron)
-iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
+// tag the final states particles (decay from c-hadron)
+iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu) {
     const Float_t mMu = 0.1057;
     iFinalStates iFinalStatesIndexes;
     Int_t nTracks = branchTrack->GetEntries();
     Track* track1;
     Track* track2;
 
-    // finding proton vertex
+    // count total number of muon track
     Int_t numMuTot = 0;
     for (int it = 0; it < nTracks; it++) {
         track1 = (Track*)branchTrack->At(it);
@@ -26,7 +26,7 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
     }
     if (numMuTot != nMu) return iFinalStatesIndexes;
 
-    // finding positive muon decay vertex
+    // finding positive muon displaced vertex. Sort the index of the muon track into a list
     Int_t vert[nTracks];
     Int_t iLoc = 0;
     for (int it = 0; it < nTracks; it++) {
@@ -36,23 +36,25 @@ iFinalStates FindFinalStatesIndex(TClonesArray* branchTrack, Int_t nMu = 3) {
             iLoc += 1;
         }
     }
+    // if not displaced muon vertex, then skip
     if (iLoc < 1) return iFinalStatesIndexes;
 
     Int_t foundMuNeg = 0;
     Int_t iMuPos, iMuNeg;
     Float_t diffM = 99999;
-    // finding same vertex oppositive charge pion
+    // findingthe Jpsi>mu mu candidates
     for (int iar = 0; iar < iLoc; iar++) {
         track1 = (Track*)branchTrack->At(vert[iar]);
         for (int it2 = 0; it2 < nTracks; it2++) {
-            // same vertex
             track2 = (Track*)branchTrack->At(it2);
+            // track2 muon is mu^- & same vertex & opposite charge
+            // since Jpsi muons must have opposite charge, pick the track2 to be mu^- will not loss the generality
             if (track2->PID == 13 && track1->X == track2->X && track1->Y == track2->Y && track1->Z == track2->Z && track1->Charge + track2->Charge == 0) {
                 TLorentzVector mu1, mu2, Hc;
-
                 mu1.SetPtEtaPhiM(track1->PT, track1->Eta, track1->Phi, mMu);
                 mu2.SetPtEtaPhiM(track2->PT, track2->Eta, track2->Phi, mMu);
                 Hc = mu1 + mu2;
+                // pick the two combined mass is closest to the Jpsi mass
                 if (abs(Hc.M() - 3.09) < diffM) {
                     diffM = abs(Hc.M() - 3.09);
                     iMuPos = vert[iar];
@@ -81,6 +83,7 @@ Int_t findMuIndex(iFinalStates iFS, TClonesArray* branchTrack) {
     Int_t iMu;
     for (int it = 0; it < nTracks; it++) {
         trackMu = (Track*)branchTrack->At(it);
+        // need to be muon track, and not those tagged from Jpsi
         if (abs(trackMu->PID) == 13 && it != iFS.iMuPos && it != iFS.iMuNeg) {
             iMu = it;
             foundMu += 1;

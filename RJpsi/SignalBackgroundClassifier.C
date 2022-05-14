@@ -44,10 +44,12 @@ Int_t ClassifySignal(TClonesArray* branchParticle, TLorentzVector* BTrue, TLoren
                     foundCTrue_i = 1;
                 }
                 if (particle0->PID == -13 && abs(particle0M->PID) == 443 && particle0M->M1 == iBTrue) {
+                    // cout << "Truth -13: " << particle0->X << "; " << particle0->Y << "; " << particle0->Z << endl;
                     iC1True_i = ip2;
                     foundC1True_i = 1;
                 }
                 if (particle0->PID == 13 && abs(particle0M->PID) == 443 && particle0M->M1 == iBTrue) {
+                    // cout << "Truth 13: " << particle0->X << "; " << particle0->Y << "; " << particle0->Z << endl;
                     iC2True_i = ip2;
                     foundC2True_i = 1;
                 }
@@ -261,7 +263,7 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
 }
 
 // chck if the event is misID bkg
-Int_t ClassifyMisID(TClonesArray* branchParticle) {
+Int_t ClassifyMisID(TClonesArray* branchParticle, Int_t* nPi_) {
     // skip signal events
     TLorentzVector dummy;
     TVector3 dummy2;
@@ -289,6 +291,8 @@ Int_t ClassifyMisID(TClonesArray* branchParticle) {
             if (abs(particle->PID) == 211 && (not(particle->X == 0 && particle->Y == 0 && particle->Z == 0))) nPi += 1;
         }
         if (not(nPi >= 1)) return 0;
+
+        *nPi_ = nPi;
         return 1;
     }
 }

@@ -11,6 +11,13 @@ using namespace std;
 #include "classes/DelphesClasses.h"
 
 // calculation of p_perp (from 2001.03225v2, 2003.08453v3)
+Float_t cal_pPerp_Hc(TVector3 v3B, TLorentzVector Hc) {
+    Float_t proj = (Hc.Px() * v3B.X() + Hc.Py() * v3B.Y() + Hc.Pz() * v3B.Z()) / pow(Length(v3B.X(), v3B.Y(), v3B.Z()), 2);
+    Float_t pPerp = Length(Hc.Px() - proj * v3B.X(), Hc.Py() - proj * v3B.Y(), Hc.Pz() - proj * v3B.Z());
+    return pPerp;
+}
+
+// calculation of p_perp (from 2001.03225v2, 2003.08453v3)
 Float_t cal_pPerp(TVector3 v3B, TLorentzVector Hc, TLorentzVector Mu) {
     TLorentzVector HcMu;
     HcMu = Hc + Mu;
