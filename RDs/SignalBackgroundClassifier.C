@@ -360,6 +360,16 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
                         particle2MM = (GenParticle*)branchParticle->At(particle2M->M1);
 
                         if (iCMother == BHadron_idx && isLeptonSemiFromB == 1) {
+                            // testing
+                            // Int_t nParticlesFromB = 0;
+                            // GenParticle* testingBHadron = (GenParticle*)branchParticle->At(BHadron_idx);
+                            // if (abs(testingBHadron->PID) != 531) cout << " text: " << testingBHadron->PID << "\n";
+                            // for (Int_t ifromB = 0; ifromB < nParticles; ifromB++) {
+                            // GenParticle* particleFromB = (GenParticle*)branchParticle->At(ifromB);
+                            // if (particleFromB->M1 == BHadron_idx) nParticlesFromB += 1;
+                            //}
+                            // if (nParticlesFromB != 3) cout << " nParticlesFromB: " << nParticlesFromB << "\n";
+                            // end testing
                             isSignal = 1;
                             continue;
                         }

@@ -63,12 +63,14 @@ void allinone(
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
         if (noise_ == 10) outputFile = "./features/RLambdacComb_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacComb_20Noise.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacComb_0Noise.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
         if (noise_ == 10) outputFile = "./features/RLambdacCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacCascade_20Noise.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacCascade_0Noise.root";
 
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
@@ -156,6 +158,7 @@ void allinone(
     for (Int_t i_en = 0; i_en < num_test; i_en++) {
         // progress
         if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
+        if (i_en != 5935 && i_en != 307074 && i_en != 798288 && i_en != 812865) continue;
 
         treeReader->ReadEntry(i_en);  // reading the entry
 
@@ -181,6 +184,22 @@ void allinone(
             cout << " No such Signal/Bkg" << endl;
         }
         if (passing == 0) continue;
+        // if (not(i_en == 933894 ||
+        // i_en == 694582 ||
+        // i_en == 445699 ||
+        // i_en == 631440 ||
+        // i_en == 574269 ||
+        // i_en == 1033343 ||
+        // i_en == 614352 ||
+        // i_en == 798288 ||
+        // i_en == 244788 ||
+        // i_en == 918589 ||
+        // i_en == 135449 ||
+        // i_en == 958376 ||
+        // i_en == 753011 ||
+        // i_en == 1024451 ||
+        // i_en == 241686 ||
+        // i_en == 470480)) continue;
 
         nEvt += 1;  // count number of truth level events
         nPi_MisID += nPi_MisID_i;
@@ -395,6 +414,7 @@ void allinone(
 
             // count the final reconstructed events
             nRecoHb += 1;
+            cout << " .............. i_en: " << i_en << "\n";
         }
     }
 

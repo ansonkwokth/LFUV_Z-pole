@@ -184,7 +184,6 @@ void allinone(
 
     // loop over events
     for (Int_t i_en = 0; i_en < num_test; i_en++) {
-        // for (Int_t i_en = 1065960; i_en < num_test; i_en++) {
         if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
 
         treeReader->ReadEntry(i_en);  // reading the entry
@@ -215,80 +214,6 @@ void allinone(
             cout << " No such Signal/Bkg" << endl;
         }
         if (passing == 0) continue;
-        if (not(i_en == 135488 ||
-                i_en == 221766 ||
-                i_en == 418007 ||
-                i_en == 1210 ||
-                i_en == 93994 ||
-                i_en == 814389 ||
-                i_en == 1065964 ||
-                i_en == 152124 ||
-                i_en == 956556 ||
-                i_en == 175734 ||
-                i_en == 850887 ||
-                i_en == 1042933 ||
-                i_en == 15560 ||
-                i_en == 527245 ||
-                i_en == 267106 ||
-                i_en == 1113731 ||
-                i_en == 764191 ||
-                i_en == 991801 ||
-                i_en == 867118 ||
-                i_en == 129808 ||
-                i_en == 716346 ||
-                i_en == 303735 ||
-                i_en == 348217 ||
-                i_en == 728717 ||
-                i_en == 667216 ||
-                i_en == 229967 ||
-                i_en == 876499 ||
-                i_en == 722357 ||
-                i_en == 808232 ||
-                i_en == 357903 ||
-                i_en == 889990 ||
-                i_en == 569199 ||
-                i_en == 1089384 ||
-                i_en == 337216 ||
-                i_en == 1065964 ||
-                i_en == 566768 ||
-                i_en == 95693 ||
-                i_en == 654751 ||
-                i_en == 308169 ||
-                i_en == 1090763 ||
-                i_en == 449866 ||
-                i_en == 110344 ||
-                i_en == 48235 ||
-                i_en == 844066 ||
-                i_en == 180790 ||
-                i_en == 688361 ||
-                i_en == 10221 ||
-                i_en == 770465 ||
-                i_en == 297143 ||
-                i_en == 229946 ||
-                i_en == 503050 ||
-                i_en == 349636 ||
-                i_en == 274912 ||
-                i_en == 190554 ||
-                i_en == 220423 ||
-                i_en == 564127 ||
-                i_en == 38912 ||
-                i_en == 681440 ||
-                i_en == 555113 ||
-                i_en == 577421 ||
-                i_en == 962998 ||
-                i_en == 64512 ||
-                i_en == 880682 ||
-                i_en == 801338 ||
-                i_en == 1064439 ||
-                i_en == 281695 ||
-                i_en == 164195 ||
-                i_en == 165499 ||
-                i_en == 395443 ||
-                i_en == 697040 ||
-                i_en == 470169 ||
-                i_en == 292471)) continue;
-        cout << " .......i_en : " << i_en << "\n";
-        // if (i_en == 1210) cout << "i en: " << i_en << "\n";
 
         nEvt += 1;  // count number of truth level events
         nPi_MisID += nPi_MisID_i;

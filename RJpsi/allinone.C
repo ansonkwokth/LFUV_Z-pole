@@ -62,18 +62,23 @@ void allinone(
         inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiComb_0Noise_NoVeto.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
         if (noise_ == 10) outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiCascade_0Noise_NoVeto.root";
 
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto.root";
+        // inputFile = "./RJpsi_comb_200m_seed2.root";
+        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed1.root";
+        // if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed2.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed1.root";
+        // if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed2.root";
 
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
@@ -143,8 +148,12 @@ void allinone(
 
     // loop over events
     for (Int_t i_en = 0; i_en < num_test; i_en++) {
+        // for (Int_t i_en = 4158740; i_en < num_test; i_en++) {
         if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
 
+        // if (i_en != 4162471 && i_en != 4171923 && i_en != 4181737 && i_en != 4182789 && i_en != 4184360 && i_en != 4214889 && i_en != 4218443 && i_en != 4225089) continue;
+        // if (i_en != 4159035 && i_en != 4159495) continue;
+        // cout << " ....: ";
         treeReader->ReadEntry(i_en);  // reading the entry
 
         //==========================================================================
@@ -169,6 +178,16 @@ void allinone(
         }
 
         if (passing == 0) continue;
+        // if (not(i_en == 160734 ||
+        // i_en == 2579758 ||
+        // i_en == 2192763 ||
+        // i_en == 761722 ||
+        // i_en == 2447002 ||
+        // i_en == 1410482 ||
+        // i_en == 3517198 ||
+        // i_en == 4158741 ||
+        // i_en == 2690601)) continue;
+        // cout << " i_en ..............: " << i_en << "\n";
 
         nEvt += 1;
         nPi_MisID += nPi_MisID_i;
@@ -238,7 +257,11 @@ void allinone(
             // ===========================================
             // ==========   unpaired muon cut   ==========
             // ===========================================
-            // need to be from Signal hemisphere
+            // testing
+            // if (mu.E() < 2) cout << "Muon E: " << mu.E() << "\n";
+            // if (mu.Pt() < 0.1) cout << "Muon P: " << mu.Pt() << "\n";
+            //  end testing
+            //  need to be from Signal hemisphere
             if (not(v3Mu.X() * v3C.X() + v3Mu.Y() * v3C.Y() + v3Mu.Z() * v3C.Z() > 0)) continue;
             // momentum cut
             if (not(mu.Pt() > 0.75 / 2 && mu.P() > 3.0 / 2)) continue;

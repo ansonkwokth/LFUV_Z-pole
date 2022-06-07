@@ -171,9 +171,13 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
             // finding the b-hadron that lepton from
             Int_t BHadron_idx = 99999;
             nLeptonStepFromB = 0;
+
+            // cout << " particle1L: " << particleL->PID << "  ";
             while (true) {
+                // cout << " particle1M: " << particle1M->PID << "  ";
                 if (int(abs(particle1M->PID) / 100) == 5 || int(abs(particle1M->PID) / 1000) == 5 || int(abs(particle1M->PID) / 10000) == 5 || int((abs(particle1M->PID) % 1000) / 100) == 5) {
                     BHadron_idx = iLeptonMother;
+                    // cout << endl;
                     break;
                 } else if (int(particle1M->PID / 10) == 0) {
                     break;
@@ -197,11 +201,23 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
                         particle2M = (GenParticle*)branchParticle->At(iCMother);
 
                         if (iCMother == BHadron_idx && isLeptonSemiFromB == 1) {
+                            // testing
+                            // Int_t nParticlesFromB = 0;
+                            // GenParticle* testingBHadron = (GenParticle*)branchParticle->At(BHadron_idx);
+                            // if (abs(testingBHadron->PID) != 541) cout << " text: " << testingBHadron->PID << "\n";
+                            // for (Int_t ifromB = 0; ifromB < nParticles; ifromB++) {
+                            // GenParticle* particleFromB = (GenParticle*)branchParticle->At(ifromB);
+                            // if (particleFromB->M1 == BHadron_idx) nParticlesFromB += 1;
+                            //}
+                            // if (nParticlesFromB != 3) cout << " nParticlesFromB: " << nParticlesFromB << "\n";
+                            // end testing
                             isSignal = 1;
                             continue;
                         }
 
+                        // cout << " particleC: " << particleC->PID << "\n";
                         while (true) {
+                            // cout << " particleC_M: " << particle2M->PID << "\n";
                             if (iCMother == BHadron_idx) {
                                 isCFromB = 1;
                                 break;
