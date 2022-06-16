@@ -273,7 +273,7 @@ Int_t ClassifyExcitedSignal(TClonesArray* branchParticle, TLorentzVector* BTrue,
 }
 
 // classify if the event is the targeted bkg (from inclusive samples)
-Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
+Int_t ClassifyBkg(TClonesArray* branchParticle, const string type, Int_t* bkgHaveFromDsstar) {
     // Inclusive samepls (for Comb+Cascade, Comb, Casde, Inclusive)
     GenParticle* particle;
     Int_t nParticles = branchParticle->GetEntries();
@@ -364,6 +364,13 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
                         particle2M = (GenParticle*)branchParticle->At(iCMother);
                         Int_t iCMotherMother = particle2M->M1;
                         if (particle2M->M1 == -1) continue;
+                        // find if the bkg has Ds* or just Ds
+                        // cout << " particleCM: " << particle2M->PID << "\n";
+                        if (abs(particle2M->PID) == 433) {
+                            *bkgHaveFromDsstar = 1;
+                        } else {
+                            *bkgHaveFromDsstar = 0;
+                        }
 
                         particle2MM = (GenParticle*)branchParticle->At(particle2M->M1);
 
@@ -408,6 +415,15 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
     }
     if (isSignal == 1) return 0;
 
+    // cout << " c pid: " << particleC->PID << "\n";
+    // cout << " m1 index: " << particleC->M1 << "\n";
+    // GenParticle* particleCM = (GenParticle*)branchParticle->At(particleC->M1);
+    // cout << " c m pid: " << particleCM->PID << "\n";
+    // if (abs(particleCM->PID) == 433) {
+    //*bkgHaveFromDsstar = 1;
+    //} else {
+    //*bkgHaveFromDsstar = 0;
+    //}
     Int_t isComb = 0;
     Int_t isCascade = 0;
     Int_t isInclusive = 0;
@@ -449,7 +465,7 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type) {
     }
 }
 
-Int_t ClassifyMisID(TClonesArray* branchParticle, Int_t* nPi_) {
+Int_t ClassifyMisID(TClonesArray* branchParticle, Int_t* nPi_, Int_t* bkgHaveFromDsstar) {
     // skip signal events
     TLorentzVector dummy;
     TVector3 dummy2;
@@ -468,9 +484,14 @@ Int_t ClassifyMisID(TClonesArray* branchParticle, Int_t* nPi_) {
 
         //=== check c-hadron ===
         Int_t nHc = 0;  // number of targeted c-hadron in the truth level (Jpsi, Ds, Lambdac)
+        *bkgHaveFromDsstar = 0;
         for (int ip = 0; ip < nParticles; ip++) {
             particle = (GenParticle*)branchParticle->At(ip);
-            if (abs(particle->PID) == 431) nHc += 1;  // check number of Jpsi
+            if (abs(particle->PID) == 431) {
+                nHc += 1;  // check number of Jpsi
+                GenParticle* particle2M = (GenParticle*)branchParticle->At(particle->M1);
+                if (abs(particle2M->PID) == 433) *bkgHaveFromDsstar = 1;
+            }
         }
         if (not(nHc >= 1)) return 0;  // must have at least one Jpsi
 

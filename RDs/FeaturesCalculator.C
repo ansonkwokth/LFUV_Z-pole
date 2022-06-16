@@ -1,3 +1,7 @@
+//
+//
+//
+//
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -287,7 +291,10 @@ Int_t findClosestPhoton(TClonesArray* branchEFlowPhoton, TLorentzVector phoTrue)
 
     photon = (Tower*)branchEFlowPhoton->At(iPhoEta);
 
-    if (closestEta < 0.01 && abs(photon->Phi - phoTrue.Phi()) < 0.01 &&
+    Float_t phiDiff = abs(phoTrue.Phi() - photon->Phi);
+    if (phiDiff > TMath::Pi()) phiDiff = 2 * TMath::Pi() - phiDiff;
+    // if (closestEta < 0.01 && abs(photon->Phi - phoTrue.Phi()) < 0.01 &&
+    if (closestEta < 0.01 && phiDiff < 0.01 &&
         abs(photon->ET / phoTrue.Et() - 1) < 0.3 &&
         abs(photon->E / phoTrue.E() - 1) < 0.3) {
         iCheatedPho = iPhoEta;
@@ -301,9 +308,14 @@ struct whichPhoton {
     Int_t iCheatedPho;
     Int_t correctPhoton = 0;
     Float_t DeltaM;
+    // specific for the lower threshold
+    Int_t emptyTower = 99999;     // check if the tower corresponding to the photon is empty or occupied
+    Float_t towerEnergy = 99999;  // if it is occupied, then what is the energy of the tower
+    Float_t phoEnergy = 99999;    // if it is occupied, then what is the energy of the true Ds* photon
+                                  // above used to compare if the occupied already had energy exceed photon energy
 };
 
-whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TLorentzVector Ds, TLorentzVector phoTrue, Float_t alpha = 1) {
+whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower, TLorentzVector Ds, TLorentzVector phoTrue, Float_t alpha = 1, Float_t threshold = -1) {
     whichPhoton wPho;
     Int_t iCheatedPho;  // index of the cheated photon (in efloephoton)
     iCheatedPho = findClosestPhoton(branchEFlowPhoton, phoTrue);
@@ -317,7 +329,12 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TLorentzVector Ds, TLoren
     Int_t foundPho = 0;
     Float_t DiffDeltaMtoTrue = 99999;
     // Loop over all the efloephoton, to find the one give closest Delta m to the PDG value
+
     for (int iph = 0; iph < nPhotons; iph++) {
+        // move the tower (skip) according to the threshold and the true photon energy
+        if (threshold != -1 && threshold > 0.5 && iph == iCheatedPho) {  // if threshold is not default (-1), and if the current tower is corresponding true photon
+            if (phoTrue.E() < threshold) continue;                       // if its energy is below the threshold, then skip this photon (pretend not detected)
+        }
         eflowpho = (Tower*)branchEFlowPhoton->At(iph);
         TLorentzVector pho;
         pho.SetPtEtaPhiE(eflowpho->ET, eflowpho->Eta, eflowpho->Phi, eflowpho->E);
@@ -340,6 +357,84 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TLorentzVector Ds, TLoren
             foundPho += 1;
         }
     }
+
+    // newly added to modify the threshold effect (when lowering the threshold)
+    // Since if we lower the threshold, this photon would not be detected and hence not in the card
+    // So, after looping the eflowphoton, compare the best one with the truth (manully smeared)
+    // if other eflowphoton is still better than the smeared turth, then do nothing
+    // if the truth is better, than store it's DeltaM and change the flags accordingly
+    if (threshold < 0.5 && threshold != -1 && (phoTrue.E() > threshold && phoTrue.E() < 0.5)) {
+        // cout << " Now doing the lowering: \n";
+        TLorentzVector pho;
+        // set ResolutionFormula { (abs(eta) <= 3.0)                   * sqrt(energy^2*0.005^2 + energy*0.20^2) }
+        Float_t sigma_E = (abs(phoTrue.Eta()) <= 3.0) * pow(pow(phoTrue.E(), 2) * pow(0.005, 2) + phoTrue.E() * pow(0.20, 2), 0.5);
+        std::default_random_engine genertator;
+        std::lognormal_distribution<double> distribution(TMath::Log(phoTrue.E()), sigma_E);
+        Float_t smearedE = distribution(genertator);
+        pho.SetPtEtaPhiE(phoTrue.Pt() * smearedE / phoTrue.E(), phoTrue.Eta(), phoTrue.Phi(), smearedE);  // should smear it later
+        // cout << " mu E: " << phoTrue.E() << "; sigma E: " << sigma_E << "\n";
+        // cout << " smearedE: " << smearedE << "\n";
+        if (not(Ds.Px() * pho.Px() + Ds.Py() * pho.Py() + Ds.Pz() * pho.Pz() <= 0)) {  // same codition as above to consistent
+
+            // check the Tower is empty or occupied
+            Int_t nTowers = branchTower->GetEntries();
+            Float_t closestEta = 99999;
+            Int_t iClosest = 99999;
+            Int_t emptyTower = 1;
+            // find the tower that has eta closest to the truth photon
+            for (int itw = 0; itw < nTowers; itw++) {
+                Tower* tower = (Tower*)branchTower->At(itw);
+                if (abs(tower->Eta - phoTrue.Eta()) < closestEta) {
+                    closestEta = abs(tower->Eta - phoTrue.Eta());
+                    iClosest = itw;
+                }
+            }
+            // tagged tower
+            Tower* tower = (Tower*)branchTower->At(iClosest);
+            // calculate the phi difference to the truth
+            Float_t closePhi = abs(phoTrue.Phi() - tower->Phi);
+            if (closePhi > TMath::Pi()) closePhi = 2 * TMath::Pi() - closePhi;
+
+            // if the eta and phi having difference < 0.01, then say this is the corresponding tower, and not empty
+            if (closestEta < 0.01 && closePhi < 0.01) emptyTower = 0;
+
+            TLorentzVector phoTower;
+            // cout << " emptyTower: " << emptyTower << "\n";
+            if (emptyTower) {  // if the tower is empty, then just use the (smeared) true photon as the record in the tower
+                phoTower = pho;
+                wPho.emptyTower = 1;
+                // cout << " photon E: " << pho.E() << "\n";
+            } else {  // if not empty, then add the (smeared) true photon on top of the existing tower
+                TLorentzVector closestTower;
+                closestTower.SetPtEtaPhiE(tower->ET, tower->Eta, tower->Phi, tower->E);
+                phoTower = closestTower + pho;
+                wPho.emptyTower = 0;
+                wPho.phoEnergy = phoTrue.E();
+                wPho.towerEnergy = tower->E;
+
+                // cout << " photon E: " << pho.E() << "; tower E: " << closestTower.E() << "\n";
+            }
+            // calculate the Delta m different to the PDG value
+            TLorentzVector Dsstar = Ds + phoTower;
+            // *** also need to consider the alpha effect, since this is the true one
+            Float_t DiffDeltaM = abs((Dsstar.M() - Ds.M()) - 0.1438);
+            Float_t DiffDeltaMtoTruei = alpha * DiffDeltaM;
+            // cout << " .................Previously closest: " << DiffDeltaMtoTrue << "\n";
+            // cout << " DeltaM: " << DiffDeltaMtoTruei << "\n";
+            //  compare the previous best one to the current one
+            //  if the current one is better, then store and return
+            if (DiffDeltaMtoTruei < DiffDeltaMtoTrue) {
+                Float_t DeltaM = 0.1438 + alpha * (Dsstar.M() - Ds.M() - 0.1438);
+                wPho.DeltaM = DeltaM;
+                wPho.correctPhoton = 1;
+                // cout << " replaced :\n";
+                return wPho;
+            }
+
+            // cout << endl;
+        }
+    }
+
     Int_t correctPhoton = 0;
     // if none of the eflowphoton passed the selection
     if (foundPho < 1) {

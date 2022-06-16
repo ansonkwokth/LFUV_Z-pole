@@ -1,6 +1,8 @@
-// ==================
-// === R(D_s^(*)) ===
-// ==================
+// TODO: change the alpha and threshold also fit bkg
+//
+//   ==================
+//   === R(D_s^(*)) ===
+//   ==================
 //
 #include <cmath>
 #include <iostream>
@@ -27,12 +29,12 @@ R__ADD_LIBRARY_PATH($DELPHES)
 R__LOAD_LIBRARY(libDelphes)
 
 void allinone(
-    const string type,          // data types (signal channel, and background types)
-    const Float_t noise_ = 10,  // amount of noise injected to vertex location (unit of microns)
-    const Bool_t save = false,  // saving the output features file (.root)
-    Int_t num_test = 0,         // number of events to be ran (default 0: run all)
-    const Float_t alpha = 1) {  // modified width of \Delta m peak (default 1: not modified)
-
+    const string type,               // data types (signal channel, and background types)
+    const Float_t noise_ = 10,       // amount of noise injected to vertex location (unit of microns)
+    const Bool_t save = false,       // saving the output features file (.root)
+    Int_t num_test = 0,              // number of events to be ran (default 0: run all)
+    const Float_t alpha = 1,         // modified width of \Delta m peak (default 1: not modified)
+    const Float_t threshold = -1) {  // modified true Ds* photon Energy threshold, if it's energy is below, then remove the corresponding tower (default -1: not modified)
     cout << "\n\n\n\n\n\n\n\n\n";
 
     string typeName;
@@ -44,12 +46,16 @@ void allinone(
     if (type == "s1") {
         cout << "Bs->Ds tau nu. " << endl;
         inputFile = "./Bs0Dstaunu-Dsphipi-phiKK_100k_RandomSeed0.root";
+        if (noise_ == 0) outputFile = "./features/DsTauNu_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/DsTauNu_5Noise.root";
         if (noise_ == 10) outputFile = "./features/DsTauNu_10Noise.root";
         if (noise_ == 20) outputFile = "./features/DsTauNu_20Noise.root";
 
     } else if (type == "s2") {
         cout << "Bs->Ds mu nu. " << endl;
         inputFile = "./Bs0Dsmunu-Dsphipi-phiKK_100k_RandomSeed0.root";
+        if (noise_ == 0) outputFile = "./features/DsMuNu_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/DsMuNu_5Noise.root";
         if (noise_ == 10) outputFile = "./features/DsMuNu_10Noise.root";
         if (noise_ == 20) outputFile = "./features/DsMuNu_20Noise.root";
 
@@ -59,12 +65,28 @@ void allinone(
         inputFile = "./Bs0Dsstartaunu-Dsphipi-phiKK_30k_RandomSeed0_30k_RandomSeed1_30k_RandomSeed2.root";
         if (noise_ == 10) {
             outputFile = "./features/DsstarTauNu_10Noise.root";
-            if (abs(alpha - 0) < 1e-6) outputFile = "./features/DsstarTauNu_10Noise_0Alpha.root";
-            if (abs(alpha - 0.1) < 1e-6) outputFile = "./features/DsstarTauNu_10Noise_01Alpha.root";
-            if (abs(alpha - 0.5) < 1e-6) outputFile = "./features/DsstarTauNu_10Noise_05Alpha.root";
-            if (abs(alpha - 2) < 1e-6) outputFile = "./features/DsstarTauNu_10Noise_2Alpha.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/DsstarTauNu_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/DsstarTauNu_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/DsstarTauNu_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/DsstarTauNu_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/DsstarTauNu_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/DsstarTauNu_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/DsstarTauNu_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/DsstarTauNu_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/DsstarTauNu_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarTauNu_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarTauNu_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarTauNu_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarTauNu_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarTauNu_10Noise_2Alpha_025Thre.root";
         } else if (noise_ == 20) {
             outputFile = "./features/DsstarTauNu_20Noise.root";
+        } else if (noise_ == 5) {
+            outputFile = "./features/DsstarTauNu_5Noise.root";
+        } else if (noise_ == 0) {
+            outputFile = "./features/DsstarTauNu_0Noise.root";
         }
 
     } else if (type == "s4") {
@@ -72,43 +94,69 @@ void allinone(
         inputFile = "./Bs0Dsstarmunu-Dsphipi-phiKK_30k_RandomSeed0.root";
         if (noise_ == 10) {
             outputFile = "./features/DsstarMuNu_10Noise.root";
-            if (abs(alpha - 0) < 1e-6) outputFile = "./features/DsstarMuNu_10Noise_0Alpha.root";
-            if (abs(alpha - 0.1) < 1e-6) outputFile = "./features/DsstarMuNu_10Noise_01Alpha.root";
-            if (abs(alpha - 0.5) < 1e-6) outputFile = "./features/DsstarMuNu_10Noise_05Alpha.root";
-            if (abs(alpha - 2) < 1e-6) outputFile = "./features/DsstarMuNu_10Noise_2Alpha.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/DsstarMuNu_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/DsstarMuNu_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/DsstarMuNu_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/DsstarMuNu_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/DsstarMuNu_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/DsstarMuNu_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/DsstarMuNu_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/DsstarMuNu_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/DsstarMuNu_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarMuNu_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarMuNu_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarMuNu_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarMuNu_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/DsstarMuNu_10Noise_2Alpha_025Thre.root";
         } else if (noise_ == 20) {
             outputFile = "./features/DsstarMuNu_20Noise.root";
+        } else if (noise_ == 5) {
+            outputFile = "./features/DsstarMuNu_5Noise.root";
+        } else if (noise_ == 0) {
+            outputFile = "./features/DsstarMuNu_0Noise.root";
         }
 
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 0) outputFile = "./features/RDsCombCascade_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RDsCombCascade_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RDsCombCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsCombCascade_20Noise.root";
 
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 0) outputFile = "./features/RDsComb_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RDsComb_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RDsComb_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsComb_20Noise.root";
-        if (noise_ == 0) outputFile = "./features/RDsComb_0Noise.root";
+        // if (noise_ == 0) outputFile = "./features/RDsComb_0Noise.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 0) outputFile = "./features/RDsCascade_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RDsCascade_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RDsCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsCascade_20Noise.root";
-        if (noise_ == 0) outputFile = "./features/RDsCascade_0Noise.root";
+        // if (noise_ == 0) outputFile = "./features/RDsCascade_0Noise.root";
 
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 0) outputFile = "./features/RDsInclusive_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RDsInclusive_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RDsInclusive_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsInclusive_20Noise.root";
 
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 0) outputFile = "./features/RDsMisID_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RDsMisID_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RDsMisID_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsMisID_20Noise.root";
 
@@ -129,6 +177,7 @@ void allinone(
     TClonesArray* branchTrack = treeReader->UseBranch("Track");
     TClonesArray* branchEFlowPhoton = treeReader->UseBranch("EFlowPhoton");
     TClonesArray* branchEFlowNeutralHadron = treeReader->UseBranch("EFlowNeutralHadron");
+    TClonesArray* branchTower = treeReader->UseBranch("Tower");
 
     GenParticle* particle;
     Track* track;
@@ -165,7 +214,14 @@ void allinone(
     Int_t num = 0;
     Int_t nPi_MisID = 0;  // total number of possible mis-id event (before preselection)
 
+    Int_t nEmptyTower = 0;
+    Int_t nNotEmptyTower = 0;
+    Int_t nTowerLargerEnergy = 0;
+    Int_t nPhotonLargerEnergy = 0;
+
     // output daata
+    cout << endl;
+    cout << " expected output file: " << outputFile << "\n";
     if (not save) outputFile = "dummy.root";
 
     TFile fea(outputFile, "recreate");
@@ -194,101 +250,105 @@ void allinone(
         //==========================================================================
         iFinalStates iFSTrue;                           // final states particles, in truth level
         TLorentzVector BTrue, HcTrue, muTrue, phoTrue;  // define lorentz vectors for the truh level
-        TVector3 v3HcTrue, v3MuTrue;
+        TVector3 v3HcTrue, v3MuTrue, v3BTrue;
         Int_t passing = 0;
         Int_t nPi_MisID_i = 0;
+        Int_t bkgHaveFromDsstar;  // if the background type has Ds*=1, otherwise Ds=0
         // check if the event pass the classification of the correspdoning event type
         // and store the truth level info (for signal types)
         if (type == "s1") {
-            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 1);
+            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 1);
         } else if (type == "s2") {
-            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 2);
+            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 2);
         } else if (type == "s3") {
-            passing = ClassifyExcitedSignal(branchParticle, &BTrue, &HcTrue, &muTrue, &phoTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 1);
+            passing = ClassifyExcitedSignal(branchParticle, &BTrue, &HcTrue, &muTrue, &phoTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 1);
         } else if (type == "s4") {
-            passing = ClassifyExcitedSignal(branchParticle, &BTrue, &HcTrue, &muTrue, &phoTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 2);
+            passing = ClassifyExcitedSignal(branchParticle, &BTrue, &HcTrue, &muTrue, &phoTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 2);
         } else if (type == "b1" || type == "b1" || type == "b2" || type == "b3" || type == "b4") {
-            passing = ClassifyBkg(branchParticle, type);
+            passing = ClassifyBkg(branchParticle, type, &bkgHaveFromDsstar);
         } else if (type == "b5") {
-            passing = ClassifyMisID(branchParticle, &nPi_MisID_i);
+            passing = ClassifyMisID(branchParticle, &nPi_MisID_i, &bkgHaveFromDsstar);
         } else {
             cout << " No such Signal/Bkg" << endl;
         }
         if (passing == 0) continue;
-        if (not(i_en == 135488 ||
-                i_en == 221766 ||
-                i_en == 418007 ||
-                i_en == 1210 ||
-                i_en == 93994 ||
-                i_en == 814389 ||
-                i_en == 1065964 ||
-                i_en == 152124 ||
-                i_en == 956556 ||
-                i_en == 175734 ||
-                i_en == 850887 ||
-                i_en == 1042933 ||
-                i_en == 15560 ||
-                i_en == 527245 ||
-                i_en == 267106 ||
-                i_en == 1113731 ||
-                i_en == 764191 ||
-                i_en == 991801 ||
-                i_en == 867118 ||
-                i_en == 129808 ||
-                i_en == 716346 ||
-                i_en == 303735 ||
-                i_en == 348217 ||
-                i_en == 728717 ||
-                i_en == 667216 ||
-                i_en == 229967 ||
-                i_en == 876499 ||
-                i_en == 722357 ||
-                i_en == 808232 ||
-                i_en == 357903 ||
-                i_en == 889990 ||
-                i_en == 569199 ||
-                i_en == 1089384 ||
-                i_en == 337216 ||
-                i_en == 1065964 ||
-                i_en == 566768 ||
-                i_en == 95693 ||
-                i_en == 654751 ||
-                i_en == 308169 ||
-                i_en == 1090763 ||
-                i_en == 449866 ||
-                i_en == 110344 ||
-                i_en == 48235 ||
-                i_en == 844066 ||
-                i_en == 180790 ||
-                i_en == 688361 ||
-                i_en == 10221 ||
-                i_en == 770465 ||
-                i_en == 297143 ||
-                i_en == 229946 ||
-                i_en == 503050 ||
-                i_en == 349636 ||
-                i_en == 274912 ||
-                i_en == 190554 ||
-                i_en == 220423 ||
-                i_en == 564127 ||
-                i_en == 38912 ||
-                i_en == 681440 ||
-                i_en == 555113 ||
-                i_en == 577421 ||
-                i_en == 962998 ||
-                i_en == 64512 ||
-                i_en == 880682 ||
-                i_en == 801338 ||
-                i_en == 1064439 ||
-                i_en == 281695 ||
-                i_en == 164195 ||
-                i_en == 165499 ||
-                i_en == 395443 ||
-                i_en == 697040 ||
-                i_en == 470169 ||
-                i_en == 292471)) continue;
-        cout << " .......i_en : " << i_en << "\n";
-        // if (i_en == 1210) cout << "i en: " << i_en << "\n";
+
+        // // {{{
+        // if (not(i_en == 135488 ||
+        // i_en == 221766 ||
+        // i_en == 418007 ||
+        // i_en == 1210 ||
+        // i_en == 93994 ||
+        // i_en == 814389 ||
+        // i_en == 1065964 ||
+        // i_en == 152124 ||
+        // i_en == 956556 ||
+        // i_en == 175734 ||
+        // i_en == 850887 ||
+        // i_en == 1042933 ||
+        // i_en == 15560 ||
+        // i_en == 527245 ||
+        // i_en == 267106 ||
+        // i_en == 1113731 ||
+        // i_en == 764191 ||
+        // i_en == 991801 ||
+        // i_en == 867118 ||
+        // i_en == 129808 ||
+        // i_en == 716346 ||
+        // i_en == 303735 ||
+        // i_en == 348217 ||
+        // i_en == 728717 ||
+        // i_en == 667216 ||
+        // i_en == 229967 ||
+        // i_en == 876499 ||
+        // i_en == 722357 ||
+        // i_en == 808232 ||
+        // i_en == 357903 ||
+        // i_en == 889990 ||
+        // i_en == 569199 ||
+        // i_en == 1089384 ||
+        // i_en == 337216 ||
+        // i_en == 1065964 ||
+        // i_en == 566768 ||
+        // i_en == 95693 ||
+        // i_en == 654751 ||
+        // i_en == 308169 ||
+        // i_en == 1090763 ||
+        // i_en == 449866 ||
+        // i_en == 110344 ||
+        // i_en == 48235 ||
+        // i_en == 844066 ||
+        // i_en == 180790 ||
+        // i_en == 688361 ||
+        // i_en == 10221 ||
+        // i_en == 770465 ||
+        // i_en == 297143 ||
+        // i_en == 229946 ||
+        // i_en == 503050 ||
+        // i_en == 349636 ||
+        // i_en == 274912 ||
+        // i_en == 190554 ||
+        // i_en == 220423 ||
+        // i_en == 564127 ||
+        // i_en == 38912 ||
+        // i_en == 681440 ||
+        // i_en == 555113 ||
+        // i_en == 577421 ||
+        // i_en == 962998 ||
+        // i_en == 64512 ||
+        // i_en == 880682 ||
+        // i_en == 801338 ||
+        // i_en == 1064439 ||
+        // i_en == 281695 ||
+        // i_en == 164195 ||
+        // i_en == 165499 ||
+        // i_en == 395443 ||
+        // i_en == 697040 ||
+        // i_en == 470169 ||
+        // i_en == 292471)) continue;
+        // cout << " .......i_en : " << i_en << "\n";
+        //  if (i_en == 1210) cout << "i en: " << i_en << "\n";
+        // }}}
 
         nEvt += 1;  // count number of truth level events
         nPi_MisID += nPi_MisID_i;
@@ -460,7 +520,7 @@ void allinone(
             features->DzSum = impParams.DzSum;
             // finding the photon, for modifying the width of \Delta m peak
             whichPhoton wPho;
-            wPho = calDeltaM(branchEFlowPhoton, Hc, phoTrue, alpha);
+            wPho = calDeltaM(branchEFlowPhoton, branchTower, Hc, phoTrue, alpha, threshold);
             features->DeltaM = wPho.DeltaM;
             features->correctPhoton = wPho.correctPhoton;
             iFS.iPho = wPho.iPho;
@@ -502,6 +562,19 @@ void allinone(
                 isDsPho = 1;
             }
 
+            if (wPho.emptyTower != 99999) {
+                // cout << " emptyTower: " << wPho.emptyTower << "\n";
+                if (wPho.emptyTower == 1) {
+                    nEmptyTower += 1;
+                } else if (wPho.emptyTower == 0) {
+                    nNotEmptyTower += 1;
+                    if (wPho.towerEnergy > wPho.phoEnergy) {
+                        nTowerLargerEnergy += 1;
+                    } else {
+                        nPhotonLargerEnergy += 1;
+                    }
+                }
+            }
             features->isDsPho = isDsPho;
             Float_t DeltaRDsPhoTrue = pow(pow(HcTrue.Phi() - phoTrue.Phi(), 2) + pow(HcTrue.Eta() - phoTrue.Eta(), 2), 0.5);
             features->DeltaRDsPhoTrue = DeltaRDsPhoTrue;
@@ -518,7 +591,13 @@ void allinone(
             Float_t sMinMuHcVertTrue;
             sMinMuHcVertTrue = distance_linepoint(v3HcTrue, v3MuTrue, muTrue);
             features->sMinMuHcVertTrue = sMinMuHcVertTrue;
+            Float_t sMinMuBVertTrue = distance_linepoint(v3BTrue, v3MuTrue, muTrue);
+            features->sMinMuBVertTrue = sMinMuBVertTrue;
+            // cout << " s true: " << sMinMuBVertTrue << "\n";
+            // cout << " s : " << features->sMinMuBVert << "\n";
+            // cout << endl;
 
+            features->bkgFromDsstar = bkgHaveFromDsstar;
             // fill the output file
             tr.Fill();
 
@@ -552,5 +631,17 @@ void allinone(
         fea.Close();
     }
     cout << "Writing to:\t" << outputFile << endl;
-}
 
+    if (threshold < 0.5) {
+        cout << " Checking the fraction of how many tower are empty \n";
+        cout << " fraction of modified photon (above new threshold): " << float(nEmptyTower + nNotEmptyTower) / nRecoHb * 100 << "%\n";
+        // cout << " nEmptyTower:    " << nEmptyTower << " (" << float(nEmptyTower) / (nEmptyTower + nNotEmptyTower) * 100 << "%) \n";
+        // cout << " nNotEmptyTower: " << nNotEmptyTower << " (" << float(nNotEmptyTower) / (nEmptyTower + nNotEmptyTower) * 100 << "%) \n";
+        cout << " nEmptyTower:    " << float(nEmptyTower) / (nEmptyTower + nNotEmptyTower) * 100 << "% \n";
+        cout << " nNotEmptyTower: " << float(nNotEmptyTower) / (nEmptyTower + nNotEmptyTower) * 100 << "% \n";
+        cout << "   nTowerLargerEnergy:  " << float(nTowerLargerEnergy) / (nNotEmptyTower)*100 << "% \n";
+        cout << "   nPhotonLargerEnergy: " << float(nPhotonLargerEnergy) / (nNotEmptyTower)*100 << "% \n";
+        // cout << "   nTowerLargerEnergy:  " << nTowerLargerEnergy << "\n";
+        // cout << "   nPhotonLargerEnergy: " << nPhotonLargerEnergy << "\n";
+    }
+}

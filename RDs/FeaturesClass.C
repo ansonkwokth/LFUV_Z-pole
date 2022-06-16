@@ -44,8 +44,10 @@ public:
     Float_t EBTrue;
     Float_t pBTrue;
     Float_t sMinMuHcVertTrue;
+    Float_t sMinMuBVertTrue;
     Int_t correctPhoton;
     Float_t EPhoTrue;         // truth photon energy
     Int_t isDsPho;            // check if the cheated photon is the Ds photon
     Float_t DeltaRDsPhoTrue;  // angular separation between truth Ds and Photon
+    Int_t bkgFromDsstar;
 };
