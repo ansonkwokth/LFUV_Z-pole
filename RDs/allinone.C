@@ -1,4 +1,4 @@
-// TODO: change the alpha and threshold also fit bkg
+//
 //
 //   ==================
 //   === R(D_s^(*)) ===
@@ -43,6 +43,7 @@ void allinone(
     const Float_t noise = noise_ * 0.001;  // change unit
 
     // reading data and naming the output file accordingly
+    // //{{{
     if (type == "s1") {
         cout << "Bs->Ds tau nu. " << endl;
         inputFile = "./Bs0Dstaunu-Dsphipi-phiKK_100k_RandomSeed0.root";
@@ -121,49 +122,140 @@ void allinone(
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 10) {
+            outputFile = "./features/RDsCombCascade_10Noise.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/RDsCombCascade_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/RDsCombCascade_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/RDsCombCascade_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/RDsCombCascade_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/RDsCombCascade_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/RDsCombCascade_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/RDsCombCascade_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/RDsCombCascade_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/RDsCombCascade_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCombCascade_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCombCascade_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCombCascade_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCombCascade_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCombCascade_10Noise_2Alpha_025Thre.root";
+        }
         if (noise_ == 0) outputFile = "./features/RDsCombCascade_0Noise.root";
         if (noise_ == 5) outputFile = "./features/RDsCombCascade_5Noise.root";
-        if (noise_ == 10) outputFile = "./features/RDsCombCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsCombCascade_20Noise.root";
 
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 10) {
+            outputFile = "./features/RDsComb_10Noise.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/RDsComb_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/RDsComb_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/RDsComb_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/RDsComb_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/RDsComb_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/RDsComb_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/RDsComb_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/RDsComb_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/RDsComb_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsComb_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsComb_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsComb_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsComb_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsComb_10Noise_2Alpha_025Thre.root";
+        }
         if (noise_ == 0) outputFile = "./features/RDsComb_0Noise.root";
         if (noise_ == 5) outputFile = "./features/RDsComb_5Noise.root";
-        if (noise_ == 10) outputFile = "./features/RDsComb_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsComb_20Noise.root";
         // if (noise_ == 0) outputFile = "./features/RDsComb_0Noise.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 10) {
+            outputFile = "./features/RDsCascade_10Noise.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/RDsCascade_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/RDsCascade_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/RDsCascade_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/RDsCascade_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/RDsCascade_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/RDsCascade_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/RDsCascade_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/RDsCascade_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/RDsCascade_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCascade_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCascade_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCascade_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCascade_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsCascade_10Noise_2Alpha_025Thre.root";
+        }
         if (noise_ == 0) outputFile = "./features/RDsCascade_0Noise.root";
         if (noise_ == 5) outputFile = "./features/RDsCascade_5Noise.root";
-        if (noise_ == 10) outputFile = "./features/RDsCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsCascade_20Noise.root";
         // if (noise_ == 0) outputFile = "./features/RDsCascade_0Noise.root";
 
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 10) {
+            outputFile = "./features/RDsInclusive_10Noise.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/RDsInclusive_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/RDsInclusive_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/RDsInclusive_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/RDsInclusive_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/RDsInclusive_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/RDsInclusive_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/RDsInclusive_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/RDsInclusive_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/RDsInclusive_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsInclusive_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsInclusive_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsInclusive_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsInclusive_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsInclusive_10Noise_2Alpha_025Thre.root";
+        }
         if (noise_ == 0) outputFile = "./features/RDsInclusive_0Noise.root";
         if (noise_ == 5) outputFile = "./features/RDsInclusive_5Noise.root";
-        if (noise_ == 10) outputFile = "./features/RDsInclusive_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsInclusive_20Noise.root";
 
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RDs_comb_1mseed1_1mseed2_1mseed3.root";
+        if (noise_ == 10) {
+            outputFile = "./features/RDsMisID_10Noise.root";
+            if (abs(alpha - 0) < 1e-6 && threshold == -1) outputFile = "./features/RDsMisID_10Noise_0Alpha.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == -1) outputFile = "./features/RDsMisID_10Noise_01Alpha.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == -1) outputFile = "./features/RDsMisID_10Noise_05Alpha.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == -1) outputFile = "./features/RDsMisID_10Noise_2Alpha.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 1) outputFile = "./features/RDsMisID_10Noise_0Alpha_1Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 1) outputFile = "./features/RDsMisID_10Noise_01Alpha_1Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 1) outputFile = "./features/RDsMisID_10Noise_05Alpha_1Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 1) outputFile = "./features/RDsMisID_10Noise_1Alpha_1Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 1) outputFile = "./features/RDsMisID_10Noise_2Alpha_1Thre.root";
+
+            if (abs(alpha - 0) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsMisID_10Noise_0Alpha_025Thre.root";
+            if (abs(alpha - 0.1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsMisID_10Noise_01Alpha_025Thre.root";
+            if (abs(alpha - 0.5) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsMisID_10Noise_05Alpha_025Thre.root";
+            if (abs(alpha - 1) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsMisID_10Noise_1Alpha_025Thre.root";
+            if (abs(alpha - 2) < 1e-6 && threshold == 0.25) outputFile = "./features/RDsMisID_10Noise_2Alpha_025Thre.root";
+        }
         if (noise_ == 0) outputFile = "./features/RDsMisID_0Noise.root";
         if (noise_ == 5) outputFile = "./features/RDsMisID_5Noise.root";
-        if (noise_ == 10) outputFile = "./features/RDsMisID_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RDsMisID_20Noise.root";
 
     } else {
         cout << "Not match. ";
         return;
     }
+    //}}}
 
     // Load lib, and read data
     gSystem->Load("libDelphes");
@@ -253,7 +345,8 @@ void allinone(
         TVector3 v3HcTrue, v3MuTrue, v3BTrue;
         Int_t passing = 0;
         Int_t nPi_MisID_i = 0;
-        Int_t bkgHaveFromDsstar;  // if the background type has Ds*=1, otherwise Ds=0
+        Int_t bkgHaveFromDsstar;                 // if the background type has Ds*=1, otherwise Ds=0
+        vector<TLorentzVector> bkgPhotons = {};  // used to store the Ds* photon for bkg. Since bkg might have multiple Ds* decays
         // check if the event pass the classification of the correspdoning event type
         // and store the truth level info (for signal types)
         if (type == "s1") {
@@ -265,15 +358,17 @@ void allinone(
         } else if (type == "s4") {
             passing = ClassifyExcitedSignal(branchParticle, &BTrue, &HcTrue, &muTrue, &phoTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 2);
         } else if (type == "b1" || type == "b1" || type == "b2" || type == "b3" || type == "b4") {
-            passing = ClassifyBkg(branchParticle, type, &bkgHaveFromDsstar);
+            passing = ClassifyBkg(branchParticle, type, &bkgHaveFromDsstar, &bkgPhotons);
         } else if (type == "b5") {
             passing = ClassifyMisID(branchParticle, &nPi_MisID_i, &bkgHaveFromDsstar);
         } else {
             cout << " No such Signal/Bkg" << endl;
         }
         if (passing == 0) continue;
+        // cout << " bkgphoton0: " << bkgPhotons.size() << "\n";
+        // if (bkgPhotons.size() != 0) cout << bkgPhotons[0].E() << "\n";
 
-        // // {{{
+        //{{{
         // if (not(i_en == 135488 ||
         // i_en == 221766 ||
         // i_en == 418007 ||
@@ -345,9 +440,10 @@ void allinone(
         // i_en == 395443 ||
         // i_en == 697040 ||
         // i_en == 470169 ||
-        // i_en == 292471)) continue;
+        // i_en == 292471 ||
+        // i_en == 1065964)) continue;
+
         // cout << " .......i_en : " << i_en << "\n";
-        //  if (i_en == 1210) cout << "i en: " << i_en << "\n";
         // }}}
 
         nEvt += 1;  // count number of truth level events
@@ -518,12 +614,57 @@ void allinone(
             features->D0Sum = impParams.D0Sum;
             features->DzMax = impParams.DzMax;
             features->DzSum = impParams.DzSum;
+
             // finding the photon, for modifying the width of \Delta m peak
             whichPhoton wPho;
-            wPho = calDeltaM(branchEFlowPhoton, branchTower, Hc, phoTrue, alpha, threshold);
-            features->DeltaM = wPho.DeltaM;
-            features->correctPhoton = wPho.correctPhoton;
-            iFS.iPho = wPho.iPho;
+            if (type.at(0) == 's') {  // since in the signal, we already tagged the true photon from Ds* from Bs
+                wPho = calDeltaM(branchEFlowPhoton, branchTower, Hc, phoTrue, alpha, threshold);
+                features->DeltaM = wPho.DeltaM;
+                features->correctPhoton = wPho.correctPhoton;
+                iFS.iPho = wPho.iPho;
+                // cout << " iFS.iPho: " << iFS.iPho << "\n";
+            } else if (type.at(0) == 'b') {  // since in backgrounds, there might have multiple Ds*, so loop and compare them also, when adjusting the threshold and alpha
+                Float_t bestDeltaMDiff = 99999;
+                Float_t bestDeltaM;
+                TLorentzVector pho;
+                wPho = calDeltaM(branchEFlowPhoton, branchTower, Hc, pho, alpha, threshold);  // compute as previously
+                bestDeltaM = wPho.DeltaM;
+                if (bkgHaveFromDsstar == 1 && bkgPhotons.size() != 0) {                               // if there is Ds* and the tagged >1 photon from Ds*
+                    for (TLorentzVector pho : bkgPhotons) {                                           // loop over the tagged photon
+                        wPho = calDeltaM(branchEFlowPhoton, branchTower, Hc, pho, alpha, threshold);  // put the current one, and adjust its threshold and alpha
+                        if (bestDeltaMDiff > abs(wPho.DeltaM - 0.1438)) {                             // compare the tagged photon, and take the best one
+                            bestDeltaMDiff = abs(wPho.DeltaM - 0.1438);
+                            bestDeltaM = wPho.DeltaM;
+                        }
+                    }
+                }
+                // cout << " best : " << bestDeltaM << "\n";
+                features->DeltaM = bestDeltaM;
+                iFS.iPho = wPho.iPho;
+            }
+
+            Int_t isDsPho;
+            if (wPho.iCheatedPho == 99999) {
+                isDsPho = 0;
+            } else {
+                isDsPho = 1;
+            }
+
+            if (wPho.emptyTower != 99999) {
+                // cout << " emptyTower: " << wPho.emptyTower << "\n";
+                if (wPho.emptyTower == 1) {
+                    nEmptyTower += 1;
+                } else if (wPho.emptyTower == 0) {
+                    nNotEmptyTower += 1;
+                    if (wPho.towerEnergy > wPho.phoEnergy) {
+                        nTowerLargerEnergy += 1;
+                    } else {
+                        nPhotonLargerEnergy += 1;
+                    }
+                }
+            }
+            features->isDsPho = isDsPho;
+
             // isolation variables
             isolationVars isoVars;
             isoVars = FindIsolationVars(branchTrack, branchEFlowNeutralHadron, branchEFlowPhoton, iFS, Hc);
@@ -555,27 +696,6 @@ void allinone(
             features->EBTrue = BTrue.E();
             features->pBTrue = BTrue.P();
             features->EPhoTrue = phoTrue.P();
-            Int_t isDsPho;
-            if (wPho.iCheatedPho == 99999) {
-                isDsPho = 0;
-            } else {
-                isDsPho = 1;
-            }
-
-            if (wPho.emptyTower != 99999) {
-                // cout << " emptyTower: " << wPho.emptyTower << "\n";
-                if (wPho.emptyTower == 1) {
-                    nEmptyTower += 1;
-                } else if (wPho.emptyTower == 0) {
-                    nNotEmptyTower += 1;
-                    if (wPho.towerEnergy > wPho.phoEnergy) {
-                        nTowerLargerEnergy += 1;
-                    } else {
-                        nPhotonLargerEnergy += 1;
-                    }
-                }
-            }
-            features->isDsPho = isDsPho;
             Float_t DeltaRDsPhoTrue = pow(pow(HcTrue.Phi() - phoTrue.Phi(), 2) + pow(HcTrue.Eta() - phoTrue.Eta(), 2), 0.5);
             features->DeltaRDsPhoTrue = DeltaRDsPhoTrue;
 
@@ -632,7 +752,7 @@ void allinone(
     }
     cout << "Writing to:\t" << outputFile << endl;
 
-    if (threshold < 0.5) {
+    if (threshold < 0.5 && threshold != -1) {
         cout << " Checking the fraction of how many tower are empty \n";
         cout << " fraction of modified photon (above new threshold): " << float(nEmptyTower + nNotEmptyTower) / nRecoHb * 100 << "%\n";
         // cout << " nEmptyTower:    " << nEmptyTower << " (" << float(nEmptyTower) / (nEmptyTower + nNotEmptyTower) * 100 << "%) \n";

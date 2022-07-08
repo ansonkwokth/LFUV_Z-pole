@@ -43,4 +43,5 @@ public:
     Float_t EBTrue;
     Float_t pBTrue;
     Float_t sMinMuHcVertTrue;
+    Float_t sMinMuBVertTrue;
 };

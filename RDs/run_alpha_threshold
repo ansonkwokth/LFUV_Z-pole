@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo -e "Run alpha=$1, threshold=$2 reconstrcuctions.\n"
+
+
+    
+declare -a types=("s3" "s4" "b1" "b4" "b5")
+
+for t in "${types[@]}"
+do 
+    FILE="allinone.C(\"${t}\", 10, true, 0, $1, $2)"
+    echo -e "\n\n\n\t-------------------------------------------------------------"
+    echo -e "\t-----\tRuning $FILE\t-----"
+    echo -e "\t-------------------------------------------------------------"
+    root -l << EOC 
+    .x $FILE 
+    .q 
+EOC
+done
+echo -e "\n\n"
+

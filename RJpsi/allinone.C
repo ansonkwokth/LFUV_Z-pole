@@ -42,47 +42,66 @@ void allinone(
     if (type == "s1") {
         cout << "Bc->Jpsi tau nu. " << endl;
         inputFile = "./Bcjpsitaunu_50m.root";
+        if (noise_ == 0) outputFile = "./features/JpsiTauNu_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/JpsiTauNu_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/JpsiTauNu_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/JpsiTauNu_20Noise_NoVeto.root";
 
     } else if (type == "s2") {
         cout << "Bc->Jpsi mu nu. " << endl;
         inputFile = "./BcJpsimunu0-2.root";
+        if (noise_ == 0) outputFile = "./features/JpsiMuNu_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/JpsiMuNu_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/JpsiMuNu_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/JpsiMuNu_20Noise_NoVeto.root";
 
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiCombCascade_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/RJpsiCombCascade_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/RJpsiCombCascade_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiCombCascade_20Noise_NoVeto.root";
 
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiComb_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/RJpsiComb_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/RJpsiComb_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiComb_20Noise_NoVeto.root";
-        if (noise_ == 0) outputFile = "./features/RJpsiComb_0Noise_NoVeto.root";
+        // if (noise_ == 0) outputFile = "./features/RJpsiComb_0Noise_NoVeto.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiCascade_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/RJpsiCascade_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/RJpsiCascade_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiCascade_20Noise_NoVeto.root";
-        if (noise_ == 0) outputFile = "./features/RJpsiCascade_0Noise_NoVeto.root";
+        // if (noise_ == 0) outputFile = "./features/RJpsiCascade_0Noise_NoVeto.root";
 
     } else if (type == "b4") {
+        // generated more data for this, and stores into two different seed .root files
+        // to run this, have to manully switch the file name, and run the code again
+        // then hadd to combine different seed files to give the overall one.
         cout << "Inclusive Bkg. " << endl;
-        inputFile = "./RJpsi_comb_200m_seed1.root";
-        // inputFile = "./RJpsi_comb_200m_seed2.root";
-        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed1.root";
-        // if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed2.root";
-        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed1.root";
-        // if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed2.root";
+        // inputFile = "./RJpsi_comb_200m_seed1.root";
+        inputFile = "./RJpsi_comb_200m_seed2.root";
+        // if (noise_ == 0) outputFile = "./features/RJpsiInclusive_0Noise_NoVeto_seed1.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiInclusive_0Noise_NoVeto_seed2.root";
+        // if (noise_ == 5) outputFile = "./features/RJpsiInclusive_5Noise_NoVeto_seed1.root";
+        if (noise_ == 5) outputFile = "./features/RJpsiInclusive_5Noise_NoVeto_seed2.root";
+        // if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed1.root";
+        if (noise_ == 10) outputFile = "./features/RJpsiInclusive_10Noise_NoVeto_seed2.root";
+        // if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed1.root";
+        if (noise_ == 20) outputFile = "./features/RJpsiInclusive_20Noise_NoVeto_seed2.root";
 
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
+        if (noise_ == 0) outputFile = "./features/RJpsiMisID_0Noise_NoVeto.root";
+        if (noise_ == 5) outputFile = "./features/RJpsiMisID_5Noise_NoVeto.root";
         if (noise_ == 10) outputFile = "./features/RJpsiMisID_10Noise_NoVeto.root";
         if (noise_ == 20) outputFile = "./features/RJpsiMisID_20Noise_NoVeto.root";
 

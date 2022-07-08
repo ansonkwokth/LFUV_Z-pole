@@ -6,7 +6,7 @@ using namespace std;
 #include "classes/DelphesClasses.h"
 
 // classifying singals, and storing the truth level indices
-Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLorentzVector *HcTrue, TLorentzVector *muTrue, TVector3 *v3HcTrue, TVector3 *v3MuTrue, iFinalStates *iFSTrue, Int_t mode) {
+Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLorentzVector *HcTrue, TLorentzVector *muTrue, TVector3 *v3HcTrue, TVector3 *v3MuTrue, TVector3 *v3BTrue, iFinalStates *iFSTrue, Int_t mode) {
     GenParticle *particle;
     GenParticle *particleB;
     GenParticle *particleC;
@@ -113,9 +113,10 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
         muTrue_.SetPtEtaPhiE(particleMu->PT, particleMu->Eta, particleMu->Phi, particleMu->E);
 
         particleC1 = (GenParticle *)branchParticle->At(iC1True);
-        TVector3 v3HcTrue_, v3MuTrue_;
+        TVector3 v3HcTrue_, v3MuTrue_, v3BTrue_;
         v3HcTrue_.SetXYZ(particleC1->X, particleC1->Y, particleC1->Z);
         v3MuTrue_.SetXYZ(particleMu->X, particleMu->Y, particleMu->Z);
+        v3BTrue_.SetXYZ(particleHc->X, particleHc->Y, particleHc->Z);
 
         *iFSTrue = iFSTrue_;
         *BTrue = BTrue_;
@@ -123,6 +124,7 @@ Int_t ClassifySignal(TClonesArray *branchParticle, TLorentzVector *BTrue, TLoren
         *muTrue = muTrue_;
         *v3HcTrue = v3HcTrue_;
         *v3MuTrue = v3MuTrue_;
+        *v3BTrue = v3BTrue_;
 
         return 1;
     } else {
@@ -191,13 +193,13 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
             // finding the b-hadron that lepton from
             Int_t BHadron_idx = 99999;
             nLeptonStepFromB = 0;
-            cout << " particleL: " << particleL->PID << "\n";
+            // cout << " particleL: " << particleL->PID << "\n";
             while (true) {
-                cout << " particle1M: " << particle1M->PID << "\n";
+                // cout << " particle1M: " << particle1M->PID << "\n";
                 if (int(abs(particle1M->PID) / 100) == 5 || int(abs(particle1M->PID) / 1000) == 5 ||
                     int(abs(particle1M->PID) / 10000) == 5 || int((abs(particle1M->PID) % 1000) / 100) == 5) {
                     BHadron_idx = iLeptonMother;
-                    cout << endl;
+                    // cout << endl;
                     break;
                 } else if (int(particle1M->PID / 10) == 0) {
                     break;
@@ -234,9 +236,9 @@ Int_t ClassifyBkg(TClonesArray *branchParticle, const string type) {
                             continue;
                         }
 
-                        cout << " particleC: " << particleC->PID << "\n";
+                        // cout << " particleC: " << particleC->PID << "\n";
                         while (true) {
-                            cout << " particle2M: " << particle2M->PID << "\n";
+                            // cout << " particle2M: " << particle2M->PID << "\n";
                             if (iCMother == BHadron_idx) {
                                 isCFromB = 1;
                                 break;
@@ -304,9 +306,9 @@ Int_t ClassifyMisID(TClonesArray *branchParticle, Int_t *nPi_) {
     TLorentzVector dummy;
     TVector3 dummy2;
     iFinalStates dummy3;
-    if (ClassifySignal(branchParticle, &dummy, &dummy, &dummy, &dummy2, &dummy2, &dummy3, 1) == 1) {
+    if (ClassifySignal(branchParticle, &dummy, &dummy, &dummy, &dummy2, &dummy2, &dummy2, &dummy3, 1) == 1) {
         return 0;
-    } else if (ClassifySignal(branchParticle, &dummy, &dummy, &dummy, &dummy2, &dummy2, &dummy3, 2) == 1) {
+    } else if (ClassifySignal(branchParticle, &dummy, &dummy, &dummy, &dummy2, &dummy2, &dummy2, &dummy3, 2) == 1) {
         return 0;
     } else {
         GenParticle *particle;

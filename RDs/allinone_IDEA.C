@@ -347,6 +347,7 @@ void allinone_IDEA(
             features->D0Sum = impParams.D0Sum;
             features->DzMax = impParams.DzMax;
             features->DzSum = impParams.DzSum;
+
             // finding the photon, for modifying the width of \Delta m peak
             whichPhoton wPho;
             wPho = calDeltaM(branchEFlowPhoton, Hc, phoTrue, alpha);

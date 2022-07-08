@@ -1,0 +1,14 @@
+#!/bin/sh
+
+echo -e "runing power per=$1. \n"
+declare -a types=("s1" "s2" "b1" "b3" "b4" "b5")
+
+for f in "${types[@]}"
+do 
+    echo -e "$f"
+    FILE="eventshapeFlavorOnly.C(\"${f}\", $1, true, 0)"
+    root -l << EOC
+    .x $FILE
+    .q 
+EOC
+done

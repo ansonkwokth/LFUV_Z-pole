@@ -203,7 +203,10 @@ updateFWMs(Float_t E1, Float_t E2, Float_t cosine_theta, FWMoments FWMs) {
 //}}}
 
 Int_t nEvt = 0;
-void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t num_test = 0, bool printOut = false) {
+// input pwr means the 'power' of the energy in calculating the FWM. The normal case is pwr=1, which is just using the energy
+// the pwr could be pwr=0, means dont care about the hardness, like just counting the particles.
+// could also try pwr=0.5
+void eventshapeFlavorOnly(const string type, const Float_t pwr = 1, const Bool_t save = false, Int_t num_test = 0, bool printOut = false) {
     cout << "\n\n\n\n\n\n\n\n\n\n";
 
     string typeName;
@@ -214,22 +217,30 @@ void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t nu
         typeName = "Bc->Jpsi tau nu. ";
         cout << "Bc->Jpsi tau nu. " << endl;
         inputFile = "./Bcjpsitaunu_50m.root";
-        outputFile = "./features/JpsiTauNu_FWM_FlavorOnly.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/JpsiTauNu_FWM_FlavorOnly.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/JpsiTauNu_FWM_FlavorOnly_pwr0.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/JpsiTauNu_FWM_FlavorOnly_pwr05.root";
         lengthOutput = "./features/JpsiTauNu_legth.root";
     } else if (type == "s2") {
         cout << "Bc->Jpsi mu nu. " << endl;
         inputFile = "./BcJpsimunu0-2.root";
-        outputFile = "./features/JpsiMuNu_FWM_FlavorOnly.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/JpsiMuNu_FWM_FlavorOnly.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/JpsiMuNu_FWM_FlavorOnly_pwr0.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/JpsiMuNu_FWM_FlavorOnly_pwr05.root";
         lengthOutput = "./features/JpsiMuNu_legth.root";
     } else if (type == "b1") {
         cout << "Comb+CascadeBkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        outputFile = "./features/RJpsiCombCascade_FWM_FlavorOnly.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/RJpsiCombCascade_FWM_FlavorOnly.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/RJpsiCombCascade_FWM_FlavorOnly_pwr0.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/RJpsiCombCascade_FWM_FlavorOnly_pwr05.root";
         lengthOutput = "./features/dummy.root";
     } else if (type == "b3") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_pwr0.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_pwr05.root";
         // inputFile = "./RJpsi_comb_200m_seed2.root";
         // outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_seed2.root";
         lengthOutput = "./features/dummy.root";
@@ -238,16 +249,21 @@ void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t nu
         // inputFile = "./RJpsi_comb_200m_seed1.root";
         // outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly.root";
         inputFile = "./RJpsi_comb_200m_seed2.root";
-        outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_seed2.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_seed2.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_pwr0_seed2.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/RJpsiInclusive_FWM_FlavorOnly_pwr05_seed2.root";
         lengthOutput = "./features/dummy.root";
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RJpsi_comb_200m_seed1.root";
-        outputFile = "./features/RJpsiMisID_FWM_FlavorOnly.root";
+        if (abs(pwr - 1) < 1e-6) outputFile = "./features/RJpsiMisID_FWM_FlavorOnly.root";
+        if (abs(pwr - 0) < 1e-6) outputFile = "./features/RJpsiMisID_FWM_FlavorOnly_pwr0.root";
+        if (abs(pwr - 0.5) < 1e-6) outputFile = "./features/RJpsiMisID_FWM_FlavorOnly_pwr05.root";
         lengthOutput = "./features/dummy.root";
     } else {
         cout << "Not match. ";
     }
+    cout << "Expect output:\t" << outputFile << endl;
 
     // Load lib, and read data
     gSystem->Load("libDelphes");
@@ -369,7 +385,8 @@ void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t nu
             GenParticle* particleTrMother = (GenParticle*)branchParticle->At(particleTr->M1);
 
             // Float_t length_i = length(track1->X, track1->Y, track1->Z);
-            // vleg->lengthFromPV = length_i;
+            //  vleg->lengthFromPV = length_i;
+            // vleg->lengthFromPV = track1->D0;
             // if (abs(particleTrMother->PID / 100) == 5) {
             // vleg->type = 1;
             //} else if (abs(particleTrMother->PID / 100) == 4) {
@@ -378,8 +395,7 @@ void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t nu
             // vleg->type = 0;
             //}
             // leg_tr.Fill();
-            //
-            //
+
             // if (length(track1->X, track1->Y, track1->Z) > 20) {
             // cout << " mother pid: " << particleTrMother->PID << "\n";
             //}
@@ -402,11 +418,11 @@ void eventshapeFlavorOnly(const string type, const Bool_t save = false, Int_t nu
                 cp2.SetPtEtaPhiE(track2->PT, track2->Eta, track2->Phi, track2->P);
                 Float_t E2 = cp2.E();
                 Float_t cosine_theta = calCosinceTheta(cp1, cp2);
-                FWMs_ = updateFWMs(E1, E2, cosine_theta, FWMs_);
+                FWMs_ = updateFWMs(pow(E1, pwr), pow(E2, pwr), cosine_theta, FWMs_);
             }
         }
-        cout << " nDisplacedTr: " << nDisplacedTr << "\n";
-        // cout << " trakcsEnergy: " << tracksEnergy << "\n";
+        // cout << " nDisplacedTr: " << nDisplacedTr << "\n";
+        //  cout << " trakcsEnergy: " << tracksEnergy << "\n";
         FWMs->iEvt = i_en;
         FWMs->H_EE0 = FWMs_.H_EE0 / pow(91.2, 2);
         FWMs->H_EE1 = FWMs_.H_EE1 / pow(91.2, 2);

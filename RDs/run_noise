@@ -1,0 +1,21 @@
+#!/bin/sh
+
+echo -e "Run noise=$1 reconstrcuctions.\n"
+
+
+    
+declare -a types=("s1" "s2" "s3" "s4" "b1" "b4" "b5")
+
+for t in "${types[@]}"
+do 
+    FILE="allinone.C(\"${t}\", $1, true, 0)"
+    echo -e "\n\n\n\t-------------------------------------------------------------"
+    echo -e "\t-----\tRuning $FILE\t-----"
+    echo -e "\t-------------------------------------------------------------"
+    root -l << EOC 
+    .x $FILE 
+    .q 
+EOC
+done
+echo -e "\n\n"
+

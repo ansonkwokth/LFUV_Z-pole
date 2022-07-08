@@ -1,7 +1,6 @@
 //
 //
 //
-//
 #include <cmath>
 #include <iostream>
 #include <random>
@@ -274,6 +273,7 @@ TLorentzVector reconstructK0S(TClonesArray* branchTrack, iFinalStates iFS, doubl
 
 // find the closest photon to the true one
 Int_t findClosestPhoton(TClonesArray* branchEFlowPhoton, TLorentzVector phoTrue) {
+    if (phoTrue.E() == 0) return 99999;
     Int_t nPhotons = branchEFlowPhoton->GetEntries();
     Tower* photon;
     Int_t iCheatedPho = 99999;  // the index of eflowphoton whcih is closest to the truth photon
@@ -333,7 +333,8 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
     for (int iph = 0; iph < nPhotons; iph++) {
         // move the tower (skip) according to the threshold and the true photon energy
         if (threshold != -1 && threshold > 0.5 && iph == iCheatedPho) {  // if threshold is not default (-1), and if the current tower is corresponding true photon
-            if (phoTrue.E() < threshold) continue;                       // if its energy is below the threshold, then skip this photon (pretend not detected)
+            // cout << "doing higher threshold" << endl;
+            if (phoTrue.E() < threshold) continue;  // if its energy is below the threshold, then skip this photon (pretend not detected)
         }
         eflowpho = (Tower*)branchEFlowPhoton->At(iph);
         TLorentzVector pho;
@@ -345,7 +346,9 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
         Float_t DiffDeltaMtoTruei;
         // If the eflowphoton is the truth one (cheated), then modify the width, to model the ecal resolution
         if (iph == iCheatedPho) {
+            // cout << " diffdeltam: " << DiffDeltaM << "\n";
             DiffDeltaMtoTruei = alpha * DiffDeltaM;
+            // cout << " DfifDeltaMtoTruei: " << DiffDeltaMtoTruei << "\n";
         } else {
             DiffDeltaMtoTruei = DiffDeltaM;
         }
@@ -371,10 +374,9 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
         std::default_random_engine genertator;
         std::lognormal_distribution<double> distribution(TMath::Log(phoTrue.E()), sigma_E);
         Float_t smearedE = distribution(genertator);
+        // Float_t smearedE = phoTrue.E();
         pho.SetPtEtaPhiE(phoTrue.Pt() * smearedE / phoTrue.E(), phoTrue.Eta(), phoTrue.Phi(), smearedE);  // should smear it later
-        // cout << " mu E: " << phoTrue.E() << "; sigma E: " << sigma_E << "\n";
-        // cout << " smearedE: " << smearedE << "\n";
-        if (not(Ds.Px() * pho.Px() + Ds.Py() * pho.Py() + Ds.Pz() * pho.Pz() <= 0)) {  // same codition as above to consistent
+        if (not(Ds.Px() * pho.Px() + Ds.Py() * pho.Py() + Ds.Pz() * pho.Pz() <= 0)) {                     // same codition as above to consistent
 
             // check the Tower is empty or occupied
             Int_t nTowers = branchTower->GetEntries();
@@ -411,6 +413,7 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
                 wPho.emptyTower = 0;
                 wPho.phoEnergy = phoTrue.E();
                 wPho.towerEnergy = tower->E;
+                foundPho += 1;
 
                 // cout << " photon E: " << pho.E() << "; tower E: " << closestTower.E() << "\n";
             }
@@ -421,12 +424,13 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
             Float_t DiffDeltaMtoTruei = alpha * DiffDeltaM;
             // cout << " .................Previously closest: " << DiffDeltaMtoTrue << "\n";
             // cout << " DeltaM: " << DiffDeltaMtoTruei << "\n";
-            //  compare the previous best one to the current one
+            // compare the previous best one to the current one
             //  if the current one is better, then store and return
             if (DiffDeltaMtoTruei < DiffDeltaMtoTrue) {
                 Float_t DeltaM = 0.1438 + alpha * (Dsstar.M() - Ds.M() - 0.1438);
                 wPho.DeltaM = DeltaM;
                 wPho.correctPhoton = 1;
+                wPho.iPho = iPho;
                 // cout << " replaced :\n";
                 return wPho;
             }
@@ -453,7 +457,9 @@ whichPhoton calDeltaM(TClonesArray* branchEFlowPhoton, TClonesArray* branchTower
         wPho.iPho = iPho;
         wPho.DeltaM = DeltaM;
 
-        if (abs(phoTrue.Eta() - pho.Eta()) < 0.01 && abs(phoTrue.Phi() - pho.Phi()) < 0.01 &&
+        Float_t phiDiff = abs(phoTrue.Phi() - pho.Phi());
+        if (phiDiff > TMath::Pi()) phiDiff = 2 * TMath::Pi() - phiDiff;
+        if (abs(phoTrue.Eta() - pho.Eta()) < 0.01 && phiDiff < 0.01 &&
             abs(pho.Et() / phoTrue.Et() - 1) < 0.3 && abs(pho.E() / phoTrue.E() - 1) < 0.3) {
             correctPhoton = 1;
         }

@@ -1,5 +1,7 @@
 #include <iostream>
 using namespace std;
+#include <vector>
+
 #include "FinalStatesClass.C"
 #include "TClonesArray.h"
 #include "TLorentzVector.h"
@@ -273,7 +275,7 @@ Int_t ClassifyExcitedSignal(TClonesArray* branchParticle, TLorentzVector* BTrue,
 }
 
 // classify if the event is the targeted bkg (from inclusive samples)
-Int_t ClassifyBkg(TClonesArray* branchParticle, const string type, Int_t* bkgHaveFromDsstar) {
+Int_t ClassifyBkg(TClonesArray* branchParticle, const string type, Int_t* bkgHaveFromDsstar, vector<TLorentzVector>* bkgPhotons) {
     // Inclusive samepls (for Comb+Cascade, Comb, Casde, Inclusive)
     GenParticle* particle;
     Int_t nParticles = branchParticle->GetEntries();
@@ -415,6 +417,29 @@ Int_t ClassifyBkg(TClonesArray* branchParticle, const string type, Int_t* bkgHav
     }
     if (isSignal == 1) return 0;
 
+    vector<TLorentzVector> storePhotons;
+    // cout << " *bkgHaveFromDsstar: " << *bkgHaveFromDsstar << "\n";
+    if (*bkgHaveFromDsstar == 1) {
+        // cout << " *bkgHaveFromDsstar: " << *bkgHaveFromDsstar << "\n";
+        Int_t nParticles = branchParticle->GetEntries();
+        for (Int_t iph = 0; iph < nParticles; iph++) {
+            GenParticle* photon = (GenParticle*)branchParticle->At(iph);
+            if (abs(photon->PID) != 22) continue;
+            GenParticle* photonM = (GenParticle*)branchParticle->At(photon->M1);
+            // cout << " photonM->PID: " << photonM->PID << "\n";
+            if (abs(photonM->PID) == 433) {
+                TLorentzVector pho;
+                pho.SetPtEtaPhiE(photon->PT, photon->Eta, photon->Phi, photon->E);
+                // cout << " found : \n";
+                storePhotons.push_back(pho);
+            }
+            // cout << " photon->M1: " << photon->M1 << "\n";
+        }
+        if (storePhotons.size() != 0) {
+            *bkgPhotons = storePhotons;
+            // cout << " storePhotn0: " << storePhotons[0].E() << "\n";
+        }
+    }
     // cout << " c pid: " << particleC->PID << "\n";
     // cout << " m1 index: " << particleC->M1 << "\n";
     // GenParticle* particleCM = (GenParticle*)branchParticle->At(particleC->M1);

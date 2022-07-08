@@ -43,44 +43,58 @@ void allinone(
     if (type == "s1") {
         cout << "Lambdab->Lambdac tau nu. " << endl;
         inputFile = "./Lambdab_lambdactaunu_pkpi_allchannel_1m_seed0_new.root";
+        if (noise_ == 0) outputFile = "./features/LambdacTauNu_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/LambdacTauNu_5Noise.root";
         if (noise_ == 10) outputFile = "./features/LambdacTauNu_10Noise.root";
         if (noise_ == 20) outputFile = "./features/LambdacTauNu_20Noise.root";
 
     } else if (type == "s2") {
         cout << "Lambdab->Lambdac mu nu. " << endl;
         inputFile = "./Lambdab_lambdacmunu_pkpi_allchannel_1m_seed0_new.root";
+        if (noise_ == 0) outputFile = "./features/LambdacMuNu_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/LambdacMuNu_5Noise.root";
         if (noise_ == 10) outputFile = "./features/LambdacMuNu_10Noise.root";
         if (noise_ == 20) outputFile = "./features/LambdacMuNu_20Noise.root";
 
     } else if (type == "b1") {
         cout << "Comb+Cascade Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacCombCascade_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RLambdacCombCascade_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RLambdacCombCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacCombCascade_20Noise.root";
 
     } else if (type == "b2") {
         cout << "Comb Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacComb_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RLambdacComb_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RLambdacComb_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacComb_20Noise.root";
-        if (noise_ == 0) outputFile = "./features/RLambdacComb_0Noise.root";
+        // if (noise_ == 0) outputFile = "./features/RLambdacComb_0Noise.root";
 
     } else if (type == "b3") {
         cout << "Cascade Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacCascade_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RLambdacCascade_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RLambdacCascade_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacCascade_20Noise.root";
-        if (noise_ == 0) outputFile = "./features/RLambdacCascade_0Noise.root";
+        // if (noise_ == 0) outputFile = "./features/RLambdacCascade_0Noise.root";
 
     } else if (type == "b4") {
         cout << "Inclusive Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacInclusive_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RLambdacInclusive_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RLambdacInclusive_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacInclusive_20Noise.root";
 
     } else if (type == "b5") {
         cout << "MisID Bkg. " << endl;
         inputFile = "./RLambdac_comb_10m_seed1_2_3_4_5_6.root";
+        if (noise_ == 0) outputFile = "./features/RLambdacMisID_0Noise.root";
+        if (noise_ == 5) outputFile = "./features/RLambdacMisID_5Noise.root";
         if (noise_ == 10) outputFile = "./features/RLambdacMisID_10Noise.root";
         if (noise_ == 20) outputFile = "./features/RLambdacMisID_20Noise.root";
 
@@ -158,7 +172,7 @@ void allinone(
     for (Int_t i_en = 0; i_en < num_test; i_en++) {
         // progress
         if ((i_en % 100000) == 0) cout << "Reconstruction Progress: " << i_en << "/" << numberOfEntries << endl;
-        if (i_en != 5935 && i_en != 307074 && i_en != 798288 && i_en != 812865) continue;
+        // if (i_en != 5935 && i_en != 307074 && i_en != 798288 && i_en != 812865) continue;
 
         treeReader->ReadEntry(i_en);  // reading the entry
 
@@ -167,15 +181,15 @@ void allinone(
         //==========================================================================
         iFinalStates iFSTrue;                  // final states particles, in truth level
         TLorentzVector BTrue, HcTrue, muTrue;  // define lorentz vector for the truth level particle
-        TVector3 v3HcTrue, v3MuTrue;
+        TVector3 v3HcTrue, v3MuTrue, v3BTrue;
         Int_t passing = 0;
         Int_t nPi_MisID_i = 0;
         // check if the event pass the classification of the correspdoning event type
         // and store the truth level info (for signal types)
         if (type == "s1") {
-            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 1);
+            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 1);
         } else if (type == "s2") {
-            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &iFSTrue, 2);
+            passing = ClassifySignal(branchParticle, &BTrue, &HcTrue, &muTrue, &v3HcTrue, &v3MuTrue, &v3BTrue, &iFSTrue, 2);
         } else if (type == "b1" || type == "b1" || type == "b2" || type == "b3" || type == "b4") {
             passing = ClassifyBkg(branchParticle, type);
         } else if (type == "b5") {
@@ -408,13 +422,18 @@ void allinone(
             Float_t sMinMuHcVertTrue;
             sMinMuHcVertTrue = distance_linepoint(v3HcTrue, v3MuTrue, muTrue);
             features->sMinMuHcVertTrue = sMinMuHcVertTrue;
+            Float_t sMinMuBVertTrue = distance_linepoint(v3BTrue, v3MuTrue, muTrue);
+            features->sMinMuBVertTrue = sMinMuBVertTrue;
+            // cout << " s true: " << sMinMuBVertTrue << "\n";
+            // cout << " s : " << features->sMinMuBVert << "\n";
+            // cout << endl;
 
             // fill the output file
             tr.Fill();
 
             // count the final reconstructed events
             nRecoHb += 1;
-            cout << " .............. i_en: " << i_en << "\n";
+            // cout << " .............. i_en: " << i_en << "\n";
         }
     }
 
