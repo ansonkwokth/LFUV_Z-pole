@@ -622,6 +622,11 @@ void allinone(
                 features->DeltaM = wPho.DeltaM;
                 features->correctPhoton = wPho.correctPhoton;
                 iFS.iPho = wPho.iPho;
+                Tower* cheatedPhoton = (Tower*)branchEFlowPhoton->At(wPho.iCheatedPho);
+                features->EPho = cheatedPhoton->E;
+                features->etaPho = cheatedPhoton->Eta;
+                features->phiPho = cheatedPhoton->Phi;
+
                 // cout << " iFS.iPho: " << iFS.iPho << "\n";
             } else if (type.at(0) == 'b') {  // since in backgrounds, there might have multiple Ds*, so loop and compare them also, when adjusting the threshold and alpha
                 Float_t bestDeltaMDiff = 99999;
@@ -696,8 +701,12 @@ void allinone(
             features->EBTrue = BTrue.E();
             features->pBTrue = BTrue.P();
             features->EPhoTrue = phoTrue.P();
+            features->etaPhoTrue = phoTrue.Eta();
+            features->phiPhoTrue = phoTrue.Phi();
             Float_t DeltaRDsPhoTrue = pow(pow(HcTrue.Phi() - phoTrue.Phi(), 2) + pow(HcTrue.Eta() - phoTrue.Eta(), 2), 0.5);
             features->DeltaRDsPhoTrue = DeltaRDsPhoTrue;
+
+            // Float_t DeltaRPhoPhoTrue = pow(pow(pho.Phi() - phoTrue.Phi(), 2) + pow(HcTrue.Eta() - phoTrue.Eta(), 2), 0.5);
 
             // K0 info
             TLorentzVector K0S;

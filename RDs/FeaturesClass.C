@@ -38,6 +38,9 @@ public:
     Float_t mK0SHcMu;          // invariant mass of the reconstructed K0S + Hc + mu;
     Float_t pK0S;              // momentum of the reconstructed K0S
     Float_t DeltaM;            // m(Ds gamma) - m(Ds)
+    Float_t EPho;
+    Float_t etaPho;
+    Float_t phiPho;
 
     Float_t q2True;
     Float_t miss2True;
@@ -46,8 +49,12 @@ public:
     Float_t sMinMuHcVertTrue;
     Float_t sMinMuBVertTrue;
     Int_t correctPhoton;
-    Float_t EPhoTrue;         // truth photon energy
+    Float_t EPhoTrue;  // truth photon energy
+    Float_t etaPhoTrue;
+    Float_t phiPhoTrue;
     Int_t isDsPho;            // check if the cheated photon is the Ds photon
     Float_t DeltaRDsPhoTrue;  // angular separation between truth Ds and Photon
     Int_t bkgFromDsstar;
+
+    Float_t DeltaRPhoPhoTrue;  // angular separation of the true and reco photon
 };
