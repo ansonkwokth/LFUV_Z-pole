@@ -303,6 +303,36 @@ Int_t findClosestPhoton(TClonesArray* branchEFlowPhoton, TLorentzVector phoTrue)
     return 99999;
 }
 
+// find the closest photon to the true one
+Int_t findClosestTower(TClonesArray* branchTower, TLorentzVector phoTrue) {
+    if (phoTrue.E() == 0) return 99999;
+    Int_t nTowers = branchTower->GetEntries();
+    Tower* toweri;
+    Int_t iCheatedTow = 99999;  // the index of eflowphoton whcih is closest to the truth photon
+
+    Float_t closestEta = 99999;
+    Int_t iTowEta = 99999;
+    for (int itw = 0; itw < nTowers; itw++) {
+        toweri = (Tower*)branchTower->At(itw);
+        if (abs(toweri->Eta - phoTrue.Eta()) < closestEta) {
+            closestEta = abs(toweri->Eta - phoTrue.Eta());
+            iTowEta = itw;
+        }
+    }
+    if (iTowEta == 99999) return 99999;
+
+    toweri = (Tower*)branchTower->At(iTowEta);
+
+    Float_t phiDiff = abs(phoTrue.Phi() - toweri->Phi);
+    if (phiDiff > TMath::Pi()) phiDiff = 2 * TMath::Pi() - phiDiff;
+    // if (closestEta < 0.01 && abs(photon->Phi - phoTrue.Phi()) < 0.01 &&
+    if (closestEta < 0.01 && phiDiff < 0.01) {
+        iCheatedTow = iTowEta;
+        return iCheatedTow;
+    }
+    return 99999;
+}
+
 struct whichPhoton {
     Int_t iPho;
     Int_t iCheatedPho;

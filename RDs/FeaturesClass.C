@@ -57,4 +57,7 @@ public:
     Int_t bkgFromDsstar;
 
     Float_t DeltaRPhoPhoTrue;  // angular separation of the true and reco photon
+                               //
+
+    Float_t ETower;
 };

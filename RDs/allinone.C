@@ -622,10 +622,34 @@ void allinone(
                 features->DeltaM = wPho.DeltaM;
                 features->correctPhoton = wPho.correctPhoton;
                 iFS.iPho = wPho.iPho;
-                Tower* cheatedPhoton = (Tower*)branchEFlowPhoton->At(wPho.iCheatedPho);
-                features->EPho = cheatedPhoton->E;
-                features->etaPho = cheatedPhoton->Eta;
-                features->phiPho = cheatedPhoton->Phi;
+                Float_t iCheatedPho = findClosestPhoton(branchEFlowPhoton, phoTrue);
+                // cout << " wPho: " << iCheatedPho << "\n";
+                if (wPho.iCheatedPho != 99999) {
+                    Tower* cheatedPhoton = (Tower*)branchEFlowPhoton->At(wPho.iCheatedPho);
+                    features->EPho = cheatedPhoton->E;
+                    features->etaPho = cheatedPhoton->Eta;
+                    features->phiPho = cheatedPhoton->Phi;
+                } else {
+                    features->EPho = 99999;
+                    features->etaPho = 99999;
+                    features->phiPho = 99999;
+                }
+
+                Int_t iCheatedTower = findClosestTower(branchTower, phoTrue);
+                Float_t Etower = 99999;
+                if (iCheatedTower != 99999) {
+                    Tower* toweri = (Tower*)branchTower->At(iCheatedTower);
+                    Etower = toweri->E;
+                }
+                features->ETower = Etower;
+                // Float_t Ephoton = 99999;
+                // if (iCheatedPho != 99999) {
+                // Tower* photoni = (Tower*)branchEFlowPhoton->At(iCheatedPho);
+                // Ephoton = photoni->E;
+                //}
+                // cout << " iCheatedTower: " << iCheatedTower << "; " << iCheatedPho << "\n";
+                // cout << " text: " << Etower << "; " << Ephoton << "\n";
+                // cout << endl;
 
                 // cout << " iFS.iPho: " << iFS.iPho << "\n";
             } else if (type.at(0) == 'b') {  // since in backgrounds, there might have multiple Ds*, so loop and compare them also, when adjusting the threshold and alpha
